@@ -6,12 +6,17 @@ import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.type.ImBoolean;
 
-/** One small profiler window: frame, tick, chunks and memory. */
+import java.util.Locale;
+
+/** Minimal, allocation-light overlay. All text is cached for half a second. */
 public final class DebugMenu {
     private static final ImBoolean OPEN = new ImBoolean(false);
     private static final float[] EMPTY = new float[15];
-    private static float[] metrics = EMPTY;
     private static long nextRefreshNs;
+    private static String frameLine = "FPS  measuring...";
+    private static String tickLine = "TPS  measuring...";
+    private static String chunkLine = "Chunks  measuring...";
+    private static String memoryLine = "Heap  measuring...";
 
     private DebugMenu() {}
 
@@ -25,36 +30,37 @@ public final class DebugMenu {
 
     public static boolean visible() { return OPEN.get(); }
 
+    private static void refresh() {
+        float[] values = NativeBridge.ready() ? NativeBridge.metrics() : EMPTY;
+        frameLine = String.format(Locale.ROOT, "FPS  %.0f     Frame  %.1f ms     P95  %.1f ms",
+                values[0], values[1], values[13]);
+        tickLine = values[5] > 0
+                ? String.format(Locale.ROOT, "TPS  %.1f     MSPT  %.1f ms     P95  %.1f ms",
+                        values[5], values[4], values[14])
+                : "TPS / MSPT  no integrated server samples";
+        chunkLine = "Chunks  " + (long) values[8] + " generated   "
+                + (long) values[6] + " loaded";
+        Runtime runtime = Runtime.getRuntime();
+        long used = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024);
+        long max = runtime.maxMemory() / (1024 * 1024);
+        memoryLine = "Heap  " + used + " / " + max + " MiB";
+    }
+
     public static void draw(ImGuiIO io) {
         if (!OPEN.get()) return;
         long now = System.nanoTime();
         if (now >= nextRefreshNs) {
-            metrics = NativeBridge.metrics();
+            refresh();
             nextRefreshNs = now + 500_000_000L;
         }
-
         if (ImGui.begin("26.3 Performance", OPEN)) {
-            if (!NativeBridge.ready()) {
-                ImGui.textWrapped("Rust profiler unavailable: " + NativeBridge.error());
+            if (NativeBridge.ready()) {
+                ImGui.text(frameLine);
+                ImGui.text(tickLine);
+                ImGui.text(chunkLine);
+                ImGui.text(memoryLine);
             } else {
-                ImGui.text(String.format(java.util.Locale.ROOT,
-                        "FPS  %.0f    Frame  %.1f ms    P95  %.1f ms",
-                        metrics[0], metrics[1], metrics[13]));
-                if (metrics[5] > 0) {
-                    ImGui.text(String.format(java.util.Locale.ROOT,
-                            "TPS  %.1f    MSPT  %.1f ms    P95  %.1f ms",
-                            metrics[5], metrics[4], metrics[14]));
-                } else {
-                    ImGui.text("TPS / MSPT  n/a (no local server samples)");
-                }
-                ImGui.text(String.format(java.util.Locale.ROOT,
-                        "Chunks  %d generated   %d loaded",
-                        (long) metrics[8], (long) metrics[6]));
-
-                Runtime runtime = Runtime.getRuntime();
-                long used = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024);
-                long max = runtime.maxMemory() / (1024 * 1024);
-                ImGui.text("Heap  " + used + " / " + max + " MiB");
+                ImGui.textWrapped("Rust unavailable: " + NativeBridge.error());
             }
         }
         ImGui.end();
