@@ -26,6 +26,23 @@ class UniversalFabricTests(unittest.TestCase):
                 self.assertIn(f"natives/{platform}/{filename}", jar.namelist())
         self.assertEqual(len((output / "SHA256SUMS.txt").read_text().splitlines()), 1)
 
+    def test_normalizes_windows_crlf_resources(self):
+        path = self.root / "mod-windows-x86_64" / "fabric.jar"
+        with ZipFile(path, "w") as jar:
+            jar.writestr("fabric.mod.json", b'{\r\n  "id": "xt9y263"\r\n}\r\n')
+            jar.writestr("dev/xt9y/perf/NativeBridge.class", b"code")
+            jar.writestr("natives/windows-x86_64/xt9y263.dll", b"win")
+        # Other platforms must have semantically identical text resources.
+        for platform, filename in PLATFORMS.items():
+            if platform == "windows-x86_64":
+                continue
+            location = self.root / f"mod-{platform}" / "fabric.jar"
+            with ZipFile(location, "w") as jar:
+                jar.writestr("fabric.mod.json", b'{\n  "id": "xt9y263"\n}\n')
+                jar.writestr("dev/xt9y/perf/NativeBridge.class", b"code")
+                jar.writestr(f"natives/{platform}/{filename}", platform.encode())
+        assemble(self.root, self.root / "dist", "dev-2")
+
     def test_rejects_code_mismatch(self):
         path = self.root / "mod-windows-x86_64/fabric.jar"
         with ZipFile(path, "w") as jar:
