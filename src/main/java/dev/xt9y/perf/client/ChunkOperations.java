@@ -19,6 +19,6 @@ public final class ChunkOperations {
         }
         var position = minecraft.player.chunkPosition();
         return NativeBridge.queueRegeneration(
-                server.getWorldPath(LevelResource.ROOT), position.x, position.z, radius);
+                server.getWorldPath(LevelResource.ROOT), position.x(), position.z(), radius);
     }
 }
