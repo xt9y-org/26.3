@@ -4,13 +4,12 @@ import dev.xt9y.perf.NativeBridge;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.type.ImBoolean;
-import imgui.type.ImInt;
 
 public final class DebugMenu {
     private static final ImBoolean OPEN = new ImBoolean(false);
-    private static final ImInt QUALITY = new ImInt(100);
-    private static final ImInt WORKERS = new ImInt(Math.max(1,
-            Math.min(64, Runtime.getRuntime().availableProcessors())));
+    private static final int[] QUALITY = {100};
+    private static final int[] WORKERS = {Math.max(1,
+            Math.min(64, Runtime.getRuntime().availableProcessors()))};
     private static volatile boolean running;
     private static volatile String result = "No benchmark has run.";
     private static String stats = "";
@@ -22,7 +21,7 @@ public final class DebugMenu {
     public static void toggle() {
         OPEN.set(!OPEN.get());
         if (OPEN.get() && !initialized) {
-            QUALITY.set(NativeBridge.quality());
+            QUALITY[0] = NativeBridge.quality();
             initialized = true;
         }
     }
@@ -45,12 +44,12 @@ public final class DebugMenu {
             ImGui.textWrapped("Benchmark only: never modifies Minecraft world chunks. "
                     + "Vanilla terrain, structures, lighting and decorations are unchanged.");
             if (ImGui.sliderInt("Sampling quality (%)", QUALITY, 1, 100)) {
-                NativeBridge.setQuality(QUALITY.get());
+                NativeBridge.setQuality(QUALITY[0]);
             }
             ImGui.sliderInt("Native workers", WORKERS, 1, 64);
             if (!running && ImGui.button("Benchmark 256 chunks")) {
                 running = true;
-                final int threads = WORKERS.get();
+                final int threads = WORKERS[0];
                 Thread.startVirtualThread(() -> {
                     try {
                         result = NativeBridge.benchmark(123456789L, 256, threads);
