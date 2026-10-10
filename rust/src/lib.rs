@@ -32,19 +32,21 @@ fn config_path() -> &'static Mutex<PathBuf> {
 }
 
 fn save_quality(value: u32) {
-    if let Ok(path) = config_path().lock() {
-        if !path.as_os_str().is_empty() {
-            if let Some(parent) = path.parent() {
-                let _ = fs::create_dir_all(parent);
-            }
-            let _ = fs::write(
-                &*path,
-                format!(
-                    "# Rust benchmark setting. Minecraft worldgen is unaffected.\nquality={value}\n"
-                ),
-            );
-        }
+    let Ok(path) = config_path().lock() else {
+        return;
+    };
+    if path.as_os_str().is_empty() {
+        return;
     }
+    if let Some(parent) = path.parent() {
+        let _ = fs::create_dir_all(parent);
+    }
+    let _ = fs::write(
+        &*path,
+        format!(
+            "# Rust benchmark setting. Minecraft worldgen is unaffected.\nquality={value}\n"
+        ),
+    );
 }
 
 fn snapshot() -> String {
@@ -88,10 +90,10 @@ pub extern "system" fn Java_dev_xt9y_perf_NativeBridge_nativeInitialize(
         let path = PathBuf::from(input.to_string_lossy().into_owned());
         if let Ok(contents) = fs::read_to_string(&path) {
             for line in contents.lines() {
-                if let Some(quality) = line.trim().strip_prefix("quality=") {
-                    if let Ok(q) = quality.trim().parse::<u32>() {
-                        QUALITY.store(q.clamp(1, 100), Relaxed);
-                    }
+                let parsed = line.trim().strip_prefix("quality=")
+                    .and_then(|value| value.trim().parse::<u32>().ok());
+                if let Some(q) = parsed {
+                    QUALITY.store(q.clamp(1, 100), Relaxed);
                 }
             }
         }
