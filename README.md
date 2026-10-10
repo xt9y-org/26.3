@@ -16,14 +16,13 @@ Minecraft Java **26.3** Fabric mod with Rust instrumentation and an experimental
 
 Requires JDK 25, Gradle 9.7, Rust stable, Fabric Loader 0.19.5.
 
-1. cd rust && cargo test && cargo build --release
-2. For a single-architecture packaged jar, copy your compiled native library to src/main/resources/natives/<os>-<arch>/ with its original system name. macos-aarch64 uses libxt9y263.dylib; linux-x86_64 uses libxt9y263.so; windows-x86_64 uses xt9y263.dll.
-3. gradle build
-4. Install the jar on Fabric 26.3 alongside Fabric API. The ImGui dependency is included during the Gradle jar build.
+1. cd rust && cargo test (optional correctness check).
+2. gradle build (automatically builds Rust in release mode and embeds the native library for the current operating system).
+3. Install the produced jar on Minecraft 26.3 Fabric with Fabric API. Gradle includes the ImGui dependency in the remapped jar.
 
-During development, alternatively add rust/target/release to java.library.path and the mod will load it directly.
+The jar targets the architecture it was built on. Build once on each target platform to distribute Mac, Windows, and Linux versions; universal multi-platform packaging is not implemented yet.
 
-No native binaries are committed. Native builds must be produced for each supported platform before distributing a universal jar.
+No native binaries are committed to Git.
 
 ## Required parity testing before any live-world integration
 
