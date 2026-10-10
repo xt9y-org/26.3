@@ -22,9 +22,11 @@ public final class PerfMod implements ModInitializer {
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             if (start[0] > 0) NativeBridge.record(3, System.nanoTime() - start[0]);
         });
-        ServerChunkEvents.CHUNK_LOAD.register((level, chunk) -> NativeBridge.chunkEvent(0));
+        ServerChunkEvents.CHUNK_LOAD.register((level, chunk, generated) -> {
+            NativeBridge.chunkEvent(0);
+            if (generated) NativeBridge.chunkEvent(2);
+        });
         ServerChunkEvents.CHUNK_UNLOAD.register((level, chunk) -> NativeBridge.chunkEvent(1));
-        ServerChunkEvents.CHUNK_GENERATE.register((level, chunk) -> NativeBridge.chunkEvent(2));
         LOGGER.info("26.3 Fabric profiler Rust active: {}", NativeBridge.ready());
     }
 }
