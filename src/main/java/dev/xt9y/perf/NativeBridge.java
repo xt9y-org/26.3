@@ -22,7 +22,7 @@ public final class NativeBridge {
         } catch (Throwable exception) {
             ready = false;
             failure = exception.toString();
-            PerfMod.LOGGER.warn("Native Rust unavailable; vanilla generation unchanged", exception);
+            System.getLogger("xt9y263").log(System.Logger.Level.WARNING, "Native Rust unavailable; vanilla generation unchanged", exception);
         }
     }
 
