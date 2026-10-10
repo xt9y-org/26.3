@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "xt9y263",
+  "version": "${version}",
+  "name": "26.3 Rust Performance",
+  "description": "Rust-native profiling, an ImGui debug menu, and experimental deterministic chunk kernels.",
+  "authors": ["xt9y"],
+  "environment": "*",
+  "entrypoints": {
+    "main": ["dev.xt9y.perf.PerfMod"],
+    "client": ["dev.xt9y.perf.client.PerfClient"]
+  },
+  "mixins": ["xt9y263.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~26.3",
+    "java": ">=25",
+    "fabric-api": "*",
+    "fabric-gui-imgui": "*"
+  }
+}
