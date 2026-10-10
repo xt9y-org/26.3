@@ -44,11 +44,13 @@ fn value_noise(seed: u64, x: f64, z: f64, octave: u32) -> f64 {
 
 pub fn height(seed: u64, x: i64, z: i64, quality: u8) -> f64 {
     let octaves = 1 + (quality.clamp(1, 100) as usize * 11 / 100);
-    let (mut total, mut amplitude, mut frequency, mut normalizer) =
-        (0.0, 1.0, 1.0 / 192.0, 0.0);
+    let (mut total, mut amplitude, mut frequency, mut normalizer) = (0.0, 1.0, 1.0 / 192.0, 0.0);
     for octave in 0..octaves {
         total += value_noise(
-            seed, x as f64 * frequency, z as f64 * frequency, octave as u32
+            seed,
+            x as f64 * frequency,
+            z as f64 * frequency,
+            octave as u32,
         ) * amplitude;
         normalizer += amplitude;
         amplitude *= 0.5;
@@ -86,16 +88,26 @@ pub fn benchmark(seed: u64, chunks: usize, quality: u8, workers: usize) -> Resul
     // The bounded Rayon pool is only used in an explicitly requested background benchmark.
     let pool = rayon::ThreadPoolBuilder::new()
         .num_threads(workers)
-        .build().map_err(|error| error.to_string())?;
+        .build()
+        .map_err(|error| error.to_string())?;
     let started = Instant::now();
     let checksum = pool.install(|| {
-        (0..chunks).into_par_iter().map(|i| {
-            let cx = (i % 64) as i32 - 32;
-            let cz = (i / 64) as i32 - 32;
-            black_box(chunk_checksum(seed, cx, cz, quality))
-        }).reduce(|| 0, |a, b| a ^ b)
+        (0..chunks)
+            .into_par_iter()
+            .map(|i| {
+                let cx = (i % 64) as i32 - 32;
+                let cz = (i / 64) as i32 - 32;
+                black_box(chunk_checksum(seed, cx, cz, quality))
+            })
+            .reduce(|| 0, |a, b| a ^ b)
     });
-    Ok(Bench { chunks, quality, workers, elapsed: started.elapsed(), checksum })
+    Ok(Bench {
+        chunks,
+        quality,
+        workers,
+        elapsed: started.elapsed(),
+        checksum,
+    })
 }
 
 #[cfg(test)]
