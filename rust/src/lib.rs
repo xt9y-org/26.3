@@ -43,9 +43,7 @@ fn save_quality(value: u32) {
     }
     let _ = fs::write(
         &*path,
-        format!(
-            "# Rust benchmark setting. Minecraft worldgen is unaffected.\nquality={value}\n"
-        ),
+        format!("# Rust benchmark setting. Minecraft worldgen is unaffected.\nquality={value}\n"),
     );
 }
 
@@ -90,7 +88,9 @@ pub extern "system" fn Java_dev_xt9y_perf_NativeBridge_nativeInitialize(
         let path = PathBuf::from(input.to_string_lossy().into_owned());
         if let Ok(contents) = fs::read_to_string(&path) {
             for line in contents.lines() {
-                let parsed = line.trim().strip_prefix("quality=")
+                let parsed = line
+                    .trim()
+                    .strip_prefix("quality=")
                     .and_then(|value| value.trim().parse::<u32>().ok());
                 if let Some(q) = parsed {
                     QUALITY.store(q.clamp(1, 100), Relaxed);
