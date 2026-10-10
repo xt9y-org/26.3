@@ -12,8 +12,32 @@ dependencies {
     include "curse.maven:fabric-gui-imgui-1423038:8991300"
     compileOnly "io.github.spair:imgui-java-binding:1.92.7.1"
 }
+// Compile and embed the native library automatically for the build machine.
+def platformName = System.getProperty('os.name').toLowerCase(Locale.ROOT)
+def platformArch = System.getProperty('os.arch').toLowerCase(Locale.ROOT)
+def nativeOS = platformName.contains('mac') ? 'macos' :
+        platformName.contains('win') ? 'windows' : 'linux'
+def nativeArch = platformArch in ['arm64', 'aarch64'] ? 'aarch64' : 'x86_64'
+def nativeFilename = nativeOS == 'windows' ? 'xt9y263.dll' :
+        nativeOS == 'macos' ? 'libxt9y263.dylib' : 'libxt9y263.so'
+def nativeSource = layout.projectDirectory.file("rust/target/release/${nativeFilename}")
+
+tasks.register('compileNative', Exec) {
+    workingDir = layout.projectDirectory.dir('rust').asFile
+    commandLine 'cargo', 'build', '--release'
+    inputs.files(fileTree('rust/src'), file('rust/Cargo.toml'))
+    outputs.file(nativeSource)
+}
+tasks.register('stageNative', Sync) {
+    dependsOn tasks.named('compileNative')
+    from(nativeSource)
+    into(layout.buildDirectory.dir("generated/native/natives/${nativeOS}-${nativeArch}"))
+}
+
 def modVersion = version.toString()
 processResources {
+    dependsOn tasks.named('stageNative')
+    from(layout.buildDirectory.dir('generated/native'))
     inputs.property 'version', modVersion
     filesMatching('fabric.mod.json') { expand version: modVersion }
 }
