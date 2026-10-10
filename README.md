@@ -1,33 +1,52 @@
-# 26.3 — Rust Performance
+# 26.3 — Fabric Rust Performance
 
-Minecraft Java **26.3** dual-loader mod (Fabric and Forge) with Rust instrumentation and an experimental parallel chunk-kernel prototype.
+**Minecraft Java 26.3 / Fabric only.** There is no Forge build, metadata, entrypoint, or supported Forge runtime.
 
-## What currently exists
+## Debug dashboard
 
-- **Fabric:** F8 toggles a Dear ImGui diagnostics panel (same renderer backend used by Personification:minecraft); open chat with T to release the mouse.
-- **Forge:** F8 opens an in-game Minecraft diagnostics screen with the same Rust metrics and benchmark. Forge does not use the Fabric-specific ImGui dependency.
-- Server and client tick durations are measured with Rust atomics, with UI updates limited to four per second.
-- A deterministic Rust 16x16 heightfield prototype uses a bounded Rayon thread pool. In the debug menu you can set sampling quality 1–100% and worker count, then benchmark 256 chunks on a background thread.
-- Native config persists in config/xt9y263.conf. If a native library is missing, the mod starts with vanilla generation unmodified.
-- A single TEST GitHub Actions workflow checks Rust fmt, clippy, tests, and Fabric build.
+Press **Right Shift** to toggle the Dear ImGui panel. Open chat with **T** when you need to release the mouse.
 
-**Scope restriction:** The live Minecraft chunk generator is NOT replaced yet, and no speedup to vanilla generation is claimed. The Rust heightfield is an isolated benchmark: its quality percentage does not change the quality or output of Minecraft's existing world generation. This matters because vanilla contains noise routing, caves, biome sampling, carvers, structures, decoration, lighting and mod hooks that must not be dropped.
+Five tabs:
 
-## Building
+- **Overview** — actual sampled frame intervals, FPS, measured CPU renderer span, server and client tick times.
+- **FPS / Frames** — FPS/frame-time history and measured CPU-renderer versus *unattributed* frame time. GPU and per-pass costs are not yet measured.
+- **TPS / Ticks** — real tick duration and recent effective TPS. The pie chart is tick execution versus a 50 ms tick budget, **not** an invented entity/block/network breakdown.
+- **Chunks** — live server/client loaded and unloaded chunk counts, plus Minecraft's generated flag received from Fabric's server chunk-load callback. No fake Rust chunk-generation benchmark remains.
+- **Tools** — destructive Overworld chunk regeneration, radius 0–2 around the player, integrated singleplayer only. Requires explicit confirmation.
 
-Requires JDK 25, Gradle 9.7, Rust stable, Fabric Loader 0.19.5.
+## How chunk regeneration works
 
-1. Run `gradle build` at the repository root for a local **Fabric** JAR (includes the current machine's Rust binary).
-2. Run `gradle -p forge build` for a local **Forge** JAR (the native backend falls back to unavailable if not packaged).
-3. GitHub Actions builds Rust for Windows x64, Linux x64, Apple Silicon and Intel macOS and assembles two universal releases: `26.3-<version>-fabric.jar` and `26.3-<version>-forge.jar`. Each universal JAR contains all four native Rust binaries, loading only the one matching the local platform.
-4. Install exactly **one** loader-specific JAR. Fabric additionally needs Fabric API; Forge needs Forge 66.0.10+ for Minecraft 26.3.
+This is an **offline** Rust-backed modification of real world data, not the synthetic benchmark.
+
+1. Back up the world yourself before testing.
+2. In singleplayer in the **Overworld**, open **Tools**, select radius and confirm. This writes a pending regeneration request into the Fabric configuration directory; the live world is not altered.
+3. **Exit Minecraft completely**, then restart. On startup Rust checks `session.lock` is exclusively available. It refuses to edit an open or locked save.
+4. For selected chunk slots, Rust backs up affected Anvil files and removes location/timestamp references in the `region`, `entities`, and `poi` files. Existing neighboring chunk entries remain unchanged. Oversized external `.mcc` chunks are rejected rather than processed unsafely.
+5. Vanilla Minecraft generates the absent chunks (including lighting) the next time they are requested. Backups reside in `xt9y263-backups/` under the world folder.
+
+**WARNING:** This permanently replaces anything built or stored in the selected chunks, including containers, entities, and POI. The backup is required for recovery. Editing chunk persistence is experimental, and the operation currently does not extend to the Nether, End, multiplayer or mod-specific sidecar databases. Failed operations keep the queue and attempt a backup-based rollback. Do not use on an important world without a complete backup.
+
+## Rust engine
+
+The Rust cdylib processes actual frame/tick samples in lock-free bounded 240-sample histories, tracks server and client chunk lifecycle counts, computes averages, and carries out queued *offline* region-file operations. JNI transports measurements and commands. The Fabric JVM entrypoint and ImGui renderer remain Java code because Minecraft Java Edition runs inside the JVM.
+
+No change to the live vanilla noise router or light engine is made yet. Asynchronous generator replacement requires exact parity across seeds, biomes, cave/structure boundaries, mod-added features, and full lighting, plus measurements against baseline. The current code does **not** claim an FPS/TPS/world-generation speedup.
+
+## Build and release
+
+Requires Java 25, Gradle 9.7, and Rust stable.
+
+```sh
+cargo test --manifest-path rust/Cargo.toml
+gradle build
+```
+
+The local JAR contains the native Rust library for the build machine. GitHub Actions builds on Linux x64, Windows x64, macOS ARM64, macOS x64, then assembles **one universal Fabric JAR** containing all four Rust libraries.
 
 Releases: https://github.com/xt9y-org/26.3/releases
 
-The universal JAR is portable between the four supported architectures, **not** between Fabric and Forge loaders. Unsupported CPU architectures are not bundled. Native binaries are never committed to Git.
+## Future profiling-driven optimizations
 
-## Required parity testing before any live-world integration
+Benchmark and instrument real chunk scheduling, generation status stages, structure placement, lighting propagation, region I/O/compression, meshing and rendering synchronization. Then move only isolated CPU kernels into Rust when it preserves Minecraft's semantics and outperforms the Java implementation after JNI overhead.
 
-A future native worldgen replacement must match vanilla byte-for-byte across multiple seeds, dimensions, chunk borders, caves, structures, biomes and decoration. Workers=1 versus workers=N must agree. No Minecraft world object may be read/written off-thread without the engine's lifecycle and ownership guarantees. Record before/after p50/p95/p99 generation latency, TPS/MSPT, allocations and memory.
-
-Pumpkin (https://github.com/Pumpkin-MC/Pumpkin) inspires bounded parallel CPU processing and eliminating unnecessary allocations; it is not a drop-in Fabric plugin.
+All world-generation changes must be opt-in until parity, mod compatibility and long-duration stress tests pass.
