@@ -21,7 +21,7 @@ final class ForgePerfClient {
                     && event.getAction() == InputConstants.PRESS) {
                 var minecraft = Minecraft.getInstance();
                 if (minecraft.player != null && minecraft.gui.screen() == null) {
-                    minecraft.setScreen(new ForgeDebugScreen());
+                    minecraft.gui.setScreen(new ForgeDebugScreen());
                 }
             }
         });
