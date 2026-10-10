@@ -159,7 +159,7 @@ pub extern "system" fn Java_dev_xt9y_perf_NativeBridge_nativeChunkEvent(
 
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_dev_xt9y_perf_NativeBridge_nativeMetrics(
-    mut env: JNIEnv,
+    env: JNIEnv,
     _class: JClass,
 ) -> jfloatArray {
     let metrics = snapshot();
