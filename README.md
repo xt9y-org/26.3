@@ -1,10 +1,11 @@
 # 26.3 — Rust Performance
 
-Minecraft Java **26.3** Fabric mod with Rust instrumentation and an experimental parallel chunk-kernel prototype.
+Minecraft Java **26.3** dual-loader mod (Fabric and Forge) with Rust instrumentation and an experimental parallel chunk-kernel prototype.
 
 ## What currently exists
 
-- F8 toggles a clean ImGui diagnostics panel (same ImGui dependency and renderer hook as Personification:minecraft). Open chat with T to release your mouse while inspecting the window.
+- **Fabric:** F8 toggles a Dear ImGui diagnostics panel (same renderer backend used by Personification:minecraft); open chat with T to release the mouse.
+- **Forge:** F8 opens an in-game Minecraft diagnostics screen with the same Rust metrics and benchmark. Forge does not use the Fabric-specific ImGui dependency.
 - Server and client tick durations are measured with Rust atomics, with UI updates limited to four per second.
 - A deterministic Rust 16x16 heightfield prototype uses a bounded Rayon thread pool. In the debug menu you can set sampling quality 1–100% and worker count, then benchmark 256 chunks on a background thread.
 - Native config persists in config/xt9y263.conf. If a native library is missing, the mod starts with vanilla generation unmodified.
@@ -16,13 +17,14 @@ Minecraft Java **26.3** Fabric mod with Rust instrumentation and an experimental
 
 Requires JDK 25, Gradle 9.7, Rust stable, Fabric Loader 0.19.5.
 
-1. cd rust && cargo test (optional correctness check).
-2. gradle build (automatically builds Rust in release mode and embeds the native library for the current operating system).
-3. Install the produced jar on Minecraft 26.3 Fabric with Fabric API. Gradle includes the ImGui dependency in the remapped jar.
+1. Run `gradle build` at the repository root for a local **Fabric** JAR (includes the current machine's Rust binary).
+2. Run `gradle -p forge build` for a local **Forge** JAR (the native backend falls back to unavailable if not packaged).
+3. GitHub Actions builds Rust for Windows x64, Linux x64, Apple Silicon and Intel macOS and assembles two universal releases: `26.3-<version>-fabric.jar` and `26.3-<version>-forge.jar`. Each universal JAR contains all four native Rust binaries, loading only the one matching the local platform.
+4. Install exactly **one** loader-specific JAR. Fabric additionally needs Fabric API; Forge needs Forge 66.0.10+ for Minecraft 26.3.
 
-The jar targets the architecture it was built on. Build once on each target platform to distribute Mac, Windows, and Linux versions; universal multi-platform packaging is not implemented yet.
+Releases: https://github.com/xt9y-org/26.3/releases
 
-No native binaries are committed to Git.
+The universal JAR is portable between the four supported architectures, **not** between Fabric and Forge loaders. Unsupported CPU architectures are not bundled. Native binaries are never committed to Git.
 
 ## Required parity testing before any live-world integration
 
