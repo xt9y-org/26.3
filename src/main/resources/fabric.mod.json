@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "xt9y263",
   "version": "${version}",
-  "name": "26.3 Rust Performance",
-  "description": "Rust-native profiling, an ImGui debug menu, and experimental deterministic chunk kernels.",
+  "name": "26.3 Performance",
+  "description": "Lightweight on-demand native Rust telemetry for Minecraft 26.3 Fabric.",
   "authors": ["xt9y"],
   "environment": "*",
   "entrypoints": {
