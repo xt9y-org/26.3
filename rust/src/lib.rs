@@ -91,11 +91,16 @@ fn snapshot() -> [f32; 15] {
         series[RENDER].mean(120),
         series[CLIENT].mean(60),
         series[SERVER].mean(40),
-        if interval > 0.0 { (1000.0 / interval).min(20.0) } else { 0.0 },
+        if interval > 0.0 {
+            (1000.0 / interval).min(20.0)
+        } else {
+            0.0
+        },
         METRICS.chunks[0].load(Relaxed) as f32,
         METRICS.chunks[1].load(Relaxed) as f32,
         METRICS.chunks[2].load(Relaxed) as f32,
-        0.0, 0.0,
+        0.0,
+        0.0,
         series[FRAME].recent_last(),
         series[SERVER].recent_last(),
         series[FRAME].percentile95(120),
@@ -116,7 +121,10 @@ impl Series {
 
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_dev_xt9y_perf_NativeBridge_nativeRecord(
-    _env: JNIEnv, _class: JClass, kind: jint, nanos: jlong,
+    _env: JNIEnv,
+    _class: JClass,
+    kind: jint,
+    nanos: jlong,
 ) {
     if (0..KINDS as jint).contains(&kind) {
         METRICS.times[kind as usize].push(nanos);
@@ -125,7 +133,9 @@ pub extern "system" fn Java_dev_xt9y_perf_NativeBridge_nativeRecord(
 
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_dev_xt9y_perf_NativeBridge_nativeServerStart(
-    _env: JNIEnv, _class: JClass, nanos: jlong,
+    _env: JNIEnv,
+    _class: JClass,
+    nanos: jlong,
 ) {
     if nanos <= 0 {
         return;
@@ -138,7 +148,9 @@ pub extern "system" fn Java_dev_xt9y_perf_NativeBridge_nativeServerStart(
 
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_dev_xt9y_perf_NativeBridge_nativeChunkEvent(
-    _env: JNIEnv, _class: JClass, kind: jint,
+    _env: JNIEnv,
+    _class: JClass,
+    kind: jint,
 ) {
     if (0..3).contains(&kind) {
         METRICS.chunks[kind as usize].fetch_add(1, Relaxed);
@@ -147,7 +159,8 @@ pub extern "system" fn Java_dev_xt9y_perf_NativeBridge_nativeChunkEvent(
 
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_dev_xt9y_perf_NativeBridge_nativeMetrics(
-    mut env: JNIEnv, _class: JClass,
+    mut env: JNIEnv,
+    _class: JClass,
 ) -> jfloatArray {
     let metrics = snapshot();
     let Ok(array) = env.new_float_array(metrics.len() as i32) else {
