@@ -1,0 +1,124 @@
+name: Build and release mod
+
+# GTNH-SmallAddons-style tagged releases, with automatic snapshot
+# prereleases whenever main is updated.
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux-x86_64
+            runner: ubuntu-24.04
+          - platform: windows-x86_64
+            runner: windows-2025
+          - platform: macos-aarch64
+            runner: macos-15
+          - platform: macos-x86_64
+            runner: macos-15-intel
+
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@v4
+
+      - name: Install Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.7.0'
+
+      - name: Run Rust tests
+        run: cargo test --manifest-path rust/Cargo.toml --locked
+
+      - name: Compile Fabric and native Rust library
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF_TYPE -eq 'tag') {
+            $version = $env:GITHUB_REF_NAME -replace '^v', ''
+          } else {
+            $version = "0.1.0-dev.$env:GITHUB_RUN_NUMBER"
+          }
+          gradle build "-Pversion=$version" --no-daemon
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Package platform-specific jar
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          $jars = @(Get-ChildItem build/libs -Filter '*.jar' -File |
+            Where-Object { $_.Name -notmatch '(-sources|-dev|-javadoc|-all)\\.jar$' })
+          if ($jars.Count -ne 1) {
+            throw "Expected one remapped mod jar, got $($jars.Count): $($jars.Name -join ', ')"
+          }
+          $version = if ($env:GITHUB_REF_TYPE -eq 'tag') {
+            $env:GITHUB_REF_NAME
+          } else {
+            "dev-$env:GITHUB_RUN_NUMBER"
+          }
+          Copy-Item $jars[0].FullName "dist/26.3-$version-${{ matrix.platform }}.jar"
+
+      - name: Upload platform build
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-${{ matrix.platform }}
+          path: dist/*.jar
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Download all platform builds
+        uses: actions/download-artifact@v4
+        with:
+          pattern: mod-*
+          path: dist
+          merge-multiple: true
+
+      - name: Verify packaged jars
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find dist -maxdepth 1 -name '*.jar' -type f | wc -l)" -eq 4
+          find dist -maxdepth 1 -name '*.jar' -printf '%f\n' | sort
+          cd dist
+          sha256sum *.jar > SHA256SUMS.txt
+
+      - name: Publish tagged release or development prerelease
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('dev-{0}', github.run_number) }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ github.ref_type == 'tag' && format('26.3 {0}', github.ref_name) || format('26.3 development build {0}', github.run_number) }}
+          prerelease: ${{ github.ref_type != 'tag' }}
+          make_latest: ${{ github.ref_type == 'tag' }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            dist/*.jar
+            dist/SHA256SUMS.txt
