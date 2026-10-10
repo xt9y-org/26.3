@@ -14,7 +14,7 @@ Minecraft Java **26.3** Fabric mod with Rust instrumentation and an experimental
 
 ## Building
 
-Requires JDK 25, Gradle 9.6, Rust stable, Fabric Loader 0.19.5.
+Requires JDK 25, Gradle 9.7, Rust stable, Fabric Loader 0.19.5.
 
 1. cd rust && cargo test && cargo build --release
 2. For a single-architecture packaged jar, copy your compiled native library to src/main/resources/natives/<os>-<arch>/ with its original system name. macos-aarch64 uses libxt9y263.dylib; linux-x86_64 uses libxt9y263.so; windows-x86_64 uses xt9y263.dll.
