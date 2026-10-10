@@ -33,7 +33,7 @@ class ReleasePackagingTests(unittest.TestCase):
                 for platform, filename in PLATFORMS.items():
                     self.assertIn(f"natives/{platform}/{filename}", archive.namelist())
                 self.assertIn("dev/xt9y/perf/NativeBridge.class", archive.namelist())
-        self.assertIn("SHA256SUMS", (output / "SHA256SUMS.txt").read_text().replace("SUMS.txt", "SUMS"))
+        self.assertEqual(len((output / "SHA256SUMS.txt").read_text().splitlines()), 2)
 
     def test_rejects_different_fabric_code(self):
         target = self.root / "mod-windows-x86_64" / "fabric.jar"
