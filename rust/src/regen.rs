@@ -38,7 +38,9 @@ fn unhex(s: &str) -> Result<Vec<u8>, String> {
         return Err("Invalid queued save path length".into());
     }
     bytes
-        .as_chunks::<2>().0.iter()
+        .as_chunks::<2>()
+        .0
+        .iter()
         .map(|p| {
             let hi = (p[0] as char).to_digit(16).ok_or("Bad hexadecimal path")?;
             let lo = (p[1] as char).to_digit(16).ok_or("Bad hexadecimal path")?;
