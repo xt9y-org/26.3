@@ -17,7 +17,7 @@ public final class PerfClient implements ClientModInitializer {
     public void onInitializeClient() {
         KeyMapping toggle = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.xt9y263.debug", InputConstants.Type.KEYBOARD,
-                InputConstants.KEY_RIGHT_SHIFT, CATEGORY));
+                InputConstants.KEY_RSHIFT, CATEGORY));
         final long[] start = {0};
         ClientTickEvents.START_CLIENT_TICK.register(client -> start[0] = System.nanoTime());
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
