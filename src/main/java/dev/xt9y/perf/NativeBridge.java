@@ -1,83 +1,65 @@
 package dev.xt9y.perf;
 
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.Locale;
 
+/** Loader-neutral JNI bridge. Rust owns sample histories and chunk counters. */
 public final class NativeBridge {
     private static volatile boolean ready;
-    private static volatile String failure = "Not initialized";
-
+    private static volatile String error = "Native Rust library unavailable";
     private NativeBridge() {}
 
     public static synchronized void initialize(Path configPath) {
         if (ready) return;
         try {
-            loadNativeLibrary();
+            load();
             nativeInitialize(configPath.toAbsolutePath().toString());
             ready = true;
-            failure = "";
+            error = "";
         } catch (Throwable exception) {
-            ready = false;
-            failure = exception.toString();
-            System.getLogger("xt9y263").log(System.Logger.Level.WARNING, "Native Rust unavailable; vanilla generation unchanged", exception);
+            error = exception.toString();
+            PerfMod.LOGGER.warn("Rust backend unavailable; no world changes applied", exception);
         }
     }
 
-    private static void loadNativeLibrary() throws Exception {
-        String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
-        String architecture = System.getProperty("os.arch", "").toLowerCase(Locale.ROOT);
-        String platform = os.contains("mac") ? "macos" :
-                os.contains("win") ? "windows" : "linux";
-        String arch = architecture.equals("aarch64") || architecture.equals("arm64")
-                ? "aarch64" : "x86_64";
+    private static void load() throws Exception {
+        String os = System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT);
+        String arch = System.getProperty("os.arch", "").toLowerCase(java.util.Locale.ROOT);
+        String platform = os.contains("mac") ? "macos" : os.contains("win") ? "windows" : "linux";
+        String cpu = arch.equals("arm64") || arch.equals("aarch64") ? "aarch64" : "x86_64";
         String filename = System.mapLibraryName("xt9y263");
-        String resource = "/natives/" + platform + "-" + arch + "/" + filename;
-        try (InputStream source = NativeBridge.class.getResourceAsStream(resource)) {
+        String resource = "/natives/" + platform + "-" + cpu + "/" + filename;
+        try (var source = NativeBridge.class.getResourceAsStream(resource)) {
             if (source == null) {
                 System.loadLibrary("xt9y263");
                 return;
             }
-            Path library = Files.createTempFile("xt9y263-", "-" + filename);
-            Files.copy(source, library, StandardCopyOption.REPLACE_EXISTING);
+            Path library = java.nio.file.Files.createTempFile("xt9y263-", "-" + filename);
+            java.nio.file.Files.copy(source, library, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             library.toFile().deleteOnExit();
             System.load(library.toAbsolutePath().toString());
         }
     }
-
     public static boolean ready() { return ready; }
-    public static String failure() { return failure; }
-
-    public static void observeServerTick(long nanos) {
-        if (ready && nanos >= 0) nativeObserveServerTick(nanos);
+    public static String error() { return error; }
+    public static void record(int kind, long nanos) { if (ready) nativeRecord(kind, nanos); }
+    public static void serverStart(long nanos) { if (ready) nativeServerStart(nanos); }
+    public static void chunkEvent(int kind) { if (ready) nativeChunkEvent(kind); }
+    public static float[] metrics() { return ready ? nativeMetrics() : new float[13]; }
+    public static float[] history(int kind) { return ready ? nativeHistory(kind) : new float[0]; }
+    public static String queueRegeneration(Path world, int x, int z, int radius) {
+        return ready ? nativeQueueRegeneration(world.toString(), x, z, radius)
+                : "Rust unavailable; regeneration was not queued.";
+    }
+    public static String regenerationStatus() {
+        return ready ? nativeRegenerationStatus() : error;
     }
 
-    public static void observeClientTick(long nanos) {
-        if (ready && nanos >= 0) nativeObserveClientTick(nanos);
-    }
-
-    public static String snapshot() {
-        return ready ? nativeSnapshot() : "Native unavailable: " + failure;
-    }
-
-    public static int quality() { return ready ? nativeQuality() : 100; }
-
-    public static void setQuality(int value) {
-        if (ready) nativeSetQuality(Math.clamp(value, 1, 100));
-    }
-
-    public static String benchmark(long seed, int chunks, int workers) {
-        return ready ? nativeBenchmark(seed, chunks, Math.clamp(workers, 1, 64))
-                : "Native library unavailable.";
-    }
-
-    private static native void nativeInitialize(String configPath);
-    private static native void nativeObserveServerTick(long nanos);
-    private static native void nativeObserveClientTick(long nanos);
-    private static native String nativeSnapshot();
-    private static native int nativeQuality();
-    private static native void nativeSetQuality(int value);
-    private static native String nativeBenchmark(long seed, int chunks, int workers);
+    private static native void nativeInitialize(String path);
+    private static native void nativeRecord(int kind, long nanos);
+    private static native void nativeServerStart(long nanos);
+    private static native void nativeChunkEvent(int kind);
+    private static native float[] nativeMetrics();
+    private static native float[] nativeHistory(int kind);
+    private static native String nativeQueueRegeneration(String path, int x, int z, int radius);
+    private static native String nativeRegenerationStatus();
 }
