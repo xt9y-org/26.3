@@ -12,9 +12,10 @@ dependencies {
     include "curse.maven:fabric-gui-imgui-1423038:8991300"
     compileOnly "io.github.spair:imgui-java-binding:1.92.7.1"
 }
+def modVersion = version.toString()
 processResources {
-    inputs.property 'version', project.version
-    filesMatching('fabric.mod.json') { expand version: project.version }
+    inputs.property 'version', modVersion
+    filesMatching('fabric.mod.json') { expand version: modVersion }
 }
 tasks.withType(JavaCompile).configureEach { options.release = 25 }
 java {
