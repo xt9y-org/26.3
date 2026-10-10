@@ -51,7 +51,7 @@ jobs:
           gradle-version: '9.7.0'
 
       - name: Run Rust tests
-        run: cargo test --manifest-path rust/Cargo.toml --locked
+        run: cargo test --manifest-path rust/Cargo.toml
 
       - name: Compile Fabric and native Rust library
         shell: pwsh
@@ -69,7 +69,7 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force dist | Out-Null
           $jars = @(Get-ChildItem build/libs -Filter '*.jar' -File |
-            Where-Object { $_.Name -notmatch '(-sources|-dev|-javadoc|-all)\\.jar$' })
+            Where-Object { $_.Name -notmatch '(-sources|-dev|-javadoc|-all)\.jar$' })
           if ($jars.Count -ne 1) {
             throw "Expected one remapped mod jar, got $($jars.Count): $($jars.Name -join ', ')"
           }
