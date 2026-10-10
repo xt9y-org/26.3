@@ -1,6 +1,6 @@
 package dev.xt9y.perf;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -43,8 +43,8 @@ public final class ForgeDebugScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        super.render(graphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         long now = System.nanoTime();
         if (now >= refreshAt) {
             stats = NativeBridge.snapshot();
@@ -52,15 +52,15 @@ public final class ForgeDebugScreen extends Screen {
         }
         int left = (this.width - 250) / 2;
         int top = (this.height - 160) / 2;
-        graphics.drawString(this.font, "26.3 / Rust Performance (Forge)", left, top, 0xFFFFFF);
+        graphics.text(this.font, "26.3 / Rust Performance (Forge)", left, top, 0xFFFFFFFF, true);
         int line = top + 16;
         for (String text : stats.split("\\n")) {
-            graphics.drawString(this.font, text, left, line, 0xDDDDDD);
+            graphics.text(this.font, text, left, line, 0xFFDDDDDD, true);
             line += 12;
         }
-        graphics.drawString(this.font, "Workers: " + workers + "   Sampling quality: " + NativeBridge.quality() + "%",
-                left, top + 78, 0xFFFFFF);
-        graphics.drawString(this.font, running ? "Running benchmark..." : result,
-                left, top + 90, 0xDDDDDD);
+        graphics.text(this.font, "Workers: " + workers + "   Sampling quality: " + NativeBridge.quality() + "%",
+                left, top + 78, 0xFFFFFFFF, true);
+        graphics.text(this.font, running ? "Running benchmark..." : result,
+                left, top + 90, 0xFFDDDDDD, true);
     }
 }
