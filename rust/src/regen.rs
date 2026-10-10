@@ -164,7 +164,7 @@ fn invalidate(plan: &Plan) -> Result<String, String> {
         }
     }
     let _keep_locked = lock;
-    match &mut work {
+    match &work {
         Ok(n) => Ok(format!("Regenerated queue: invalidated {n} stored chunk entries; vanilla will rebuild terrain and lighting. Backup: {}", backup.display())),
         Err(error) => Err(format!("{error}. Original region files retained under {}", backup.display())),
     }
