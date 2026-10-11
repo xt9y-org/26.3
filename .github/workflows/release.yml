@@ -106,6 +106,14 @@ jobs:
           rm -rf run/world
           XT9Y_TEST_LIGHT_ORACLE=1 XT9Y263_PARITY=1 bash scripts/smoke_server.sh
           python3 scripts/check_lighting.py baseline-light.log run/xt9y263-smoke.log
+      - name: Actual Minecraft worldgen and path/fluid oracle parity
+        shell: bash
+        run: |
+          XT9Y_TEST_LEVEL_NAME=xt9y-hotpath-parity-world XT9Y_TEST_WORLDGEN_SNAPSHOT=1 XT9Y_TEST_PATH_ORACLE=1 XT9Y263_PARITY=1 bash scripts/smoke_server.sh
+          cp run/xt9y263-smoke.log baseline-hotpaths.log
+          rm -rf run/xt9y-hotpath-parity-world
+          XT9Y_TEST_LEVEL_NAME=xt9y-hotpath-parity-world XT9Y_TEST_WORLDGEN_SNAPSHOT=1 XT9Y_TEST_PATH_ORACLE=1 XT9Y_NATIVE_HOTPATHS=1 XT9Y263_PARITY=1 bash scripts/smoke_server.sh
+          python3 scripts/compare_engine_parity.py baseline-hotpaths.log run/xt9y263-smoke.log
       - name: Install software OpenGL client environment
         run: |
           sudo apt-get update -qq
@@ -120,6 +128,7 @@ jobs:
           name: release-tag-validation-logs
           path: |
             baseline-light.log
+            baseline-hotpaths.log
             run/xt9y263-smoke.log
             run/logs/latest.log
             run/crash-reports/
