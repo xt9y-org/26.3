@@ -92,3 +92,16 @@ oracle in the actual Minecraft 26.3 server. Adapted under LGPL-3.0 from
 Lithium's 26.3 allocation optimization; full source and license are embedded.
 The mixins are skipped automatically if Lithium is installed separately, and
 `XT9Y_PERF_BASELINE=1` disables the optimization for comparisons.
+
+### In-house worldgen / shape-occlusion cache
+
+A bounded 256-entry **per-thread** voxel-shape cache avoids repeated, exact
+full-block voxel comparisons used by geometry/worldgen and related block logic.
+No input coordinates, RNG state, light levels, transparency or quality setting
+are modified. The result is computed using Minecraft's original
+`Shapes.joinIsNotEmpty(..., BooleanOp.NOT_SAME)` predicate on cache misses.
+It is disabled when Lithium/C2ME is separately installed to avoid duplicate
+mixins. CI tests cached results against vanilla in the real 26.3 server, in
+both optimized and `XT9Y_PERF_BASELINE=1` modes.
+
+This does **not** replace the terrain noise generator or full lighting engine.

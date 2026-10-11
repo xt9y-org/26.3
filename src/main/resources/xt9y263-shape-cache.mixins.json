@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "dev.xt9y.perf.mixin.shape",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "dev.xt9y.perf.mixin.shape.ShapeMixinPlugin",
+  "mixins": [
+    "FullBlockShapeMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

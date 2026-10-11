@@ -52,3 +52,16 @@ inside the JAR at `META-INF/sources/xt9y-chunk-random/` and
 `META-INF/licenses/LGPL-3.0-Lithium.txt`, respectively.
 No Lithium JAR is bundled. The source implementation uses the exact same
 int32 random progression and coordinates as Minecraft but avoids allocations.
+
+## Source-port step 6: full-block voxel-shape lookup caching
+
+The full-block shape-cache algorithm has been adapted from the MIT-licensed
+C2ME worldgen-vanilla tlcache implementation by ishland et al., with Mojang
+Minecraft 26.3 mappings and a plugin to disable the conflicting upstream
+Lithium/C2ME mixins:
+https://github.com/RelativityMC/C2ME-fabric/blob/dev/26.3.0/c2me-opts-worldgen-vanilla/src/main/java/com/ishland/c2me/opts/worldgen/vanilla/mixin/tlcache/MixinBlock.java
+
+Only boolean results from vanilla's exact voxel-shape comparison are stored in
+a per-thread, 256-entry bounded cache. No worldgen, lighting or geometry
+approximation is introduced. The C2ME MIT source header and full license are
+included with this mod, and no upstream C2ME JAR is bundled.

@@ -19,6 +19,10 @@ public final class PerfMod implements ModInitializer {
             net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTED
                     .register(server -> dev.xt9y.perf.testing.ChunkRandomOracle.verify(server.overworld()));
         }
+        if ("1".equals(System.getenv("XT9Y_TEST_SHAPE_CACHE"))) {
+            net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTED
+                    .register(server -> dev.xt9y.perf.testing.ShapeCacheOracle.verify());
+        }
         // No native loading, file IO, or sampling until the debugger is opened.
         final long[] started = {0};
         ServerTickEvents.START_SERVER_TICK.register(server -> {
