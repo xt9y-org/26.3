@@ -38,3 +38,36 @@ jobs:
         run: python3 scripts/check_bundle.py
       - name: Boot Minecraft server and verify mod compatibility
         run: bash scripts/smoke_server.sh
+
+  parity:
+    name: Vanilla vs optimized terrain and lighting
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.7.0'
+      - name: Generate seed 73452981 using baseline Fabric + vanilla engines
+        run: bash scripts/smoke_server.sh -Pxt9yDisableEngines=true
+      - name: Preserve baseline Anvil world
+        run: |
+          test -d run/world/region
+          mv run run-baseline
+      - name: Generate identical seed using six optimized engines
+        run: bash scripts/smoke_server.sh
+      - name: Verify lossless block, biome, heightmap and lighting output
+        run: python3 scripts/world_fingerprint.py run-baseline/world run/world --minimum 8
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: world-parity-logs
+          path: |
+            run/xt9y263-smoke.log
+            run-baseline/xt9y263-smoke.log
+          if-no-files-found: ignore
