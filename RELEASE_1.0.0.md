@@ -55,7 +55,10 @@ Only after the candidate passes your validation and is merged to **main**:
 
 1. Open **Actions → Universal Fabric release → Run workflow**.
 2. Select **main**, set `version` to `1.0.0`, and
-   `confirm_publish` to **RELEASE**.
+   `confirm_publish` to **RELEASE**, and
+   `hardware_client_tested` to **TESTED** after personally verifying the
+   client on a real GPU. The CI Mesa software Vulkan render can be
+   inconclusive, but actual Mixin errors still fail publication.
 3. The workflow compiles Windows x64, Linux x64, macOS Apple Silicon and Intel
    macOS native libraries, then runs server oracles and the graphical client
    smoke. A failure in any required job stops publication.
