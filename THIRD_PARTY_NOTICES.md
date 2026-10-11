@@ -52,3 +52,16 @@ inside the JAR at `META-INF/sources/xt9y-chunk-random/` and
 `META-INF/licenses/LGPL-3.0-Lithium.txt`, respectively.
 No Lithium JAR is bundled. The source implementation uses the exact same
 int32 random progression and coordinates as Minecraft but avoids allocations.
+
+## Source-port candidate: redundant framebuffer reset elimination
+
+The `GlCommandEncoderMixin` and `GlSurfaceMixin` are adaptations of
+ImmediatelyFast's 26.3 "avoid_redundant_framebuffer_switching" mixins,
+copyright (C) 2023-2026 RaphiMC and contributors, licensed LGPL-3.0-or-later.
+Source: https://github.com/RaphiMC/ImmediatelyFast/tree/26.3/common/src/main/java/net/raphimc/immediatelyfast/injection/mixins/avoid_redundant_framebuffer_switching
+
+Corresponding .java sources are inside the JAR under
+`META-INF/sources/xt9y-render-fbo` and license under
+`META-INF/licenses/LGPL-3.0-ImmediatelyFast.txt`.
+No ImmediatelyFast JAR is embedded. Disabled by default until
+graphical-client equivalence is established.

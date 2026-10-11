@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "dev.xt9y.perf.mixin.render",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "dev.xt9y.perf.mixin.render.FboMixinPlugin",
+  "client": [
+    "GlCommandEncoderMixin",
+    "GlSurfaceMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
