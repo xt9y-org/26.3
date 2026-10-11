@@ -105,3 +105,14 @@ mixins. CI tests cached results against vanilla in the real 26.3 server, in
 both optimized and `XT9Y_PERF_BASELINE=1` modes.
 
 This does **not** replace the terrain noise generator or full lighting engine.
+
+## Repeatable in-game TPS/MSPT benchmark
+
+GitHub CI launches the actual Minecraft 26.3 server twice with the same
+seed and 169 forced chunks: first with `XT9Y_PERF_BASELINE=1`, then with
+the optimizations. An opt-in `XT9Y_TPS_BENCH=1` hook records a bounded
+array of real server tick durations after a 100-tick warmup, reporting
+mean/P95/P99 MSPT and heap use. The hook is entirely absent from normal
+runs. The CI summary includes the measured baseline and optimized values.
+One comparison is not proof of a sustained speedup and does not measure
+GPU rendering/FPS.
