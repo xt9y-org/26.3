@@ -177,3 +177,49 @@ Graphical smoke in CI requires a real client tick, completed rendered frame
 and glyph-buffer optimization invocation. It separately checks baseline
 mode without the glyph mixin. This is a startup/hook correctness check, **not**
 a visual pixel-parity test or real-GPU benchmark.
+
+
+## Experimental worldgen and pathfinding hot paths
+
+`XT9Y_NATIVE_HOTPATHS=1` enables two direct-source, LGPL-compatible
+Minecraft hot paths (no extra Lithium JAR):
+- **Chunk generator:** cache the immutable sea-level setting after lazy registry
+  binding rather than resolve its holder for every generator call.
+- **AI pathfinding:** flatten `PathNavigationRegion` chunk arrays and read the
+  exact vanilla block/fluid state from loaded chunk sections.
+
+These are **not** a multithreaded chunk generator, full AI rewrite, complete
+light engine, or a terrain mesh renderer. Source is shipped in the JAR and
+the optimizations are disabled by default until a real Minecraft build,
+worldgen/path oracle and performance A/B testing pass. Baseline mode
+`XT9Y_PERF_BASELINE=1` and separately installed Lithium disable both mixins.
+
+On a testing machine, launch Minecraft with
+`XT9Y_NATIVE_HOTPATHS=1` and verify pathfinding mobs in an existing
+**backup** of a world first. For a reproducible fresh-world server parity
+test, CI runs two Minecraft 26.3 servers with identical seed
+`73452981` and 169 force-loaded chunks, samples world blocks, then checks
+that `PathNavigationRegion` block/fluid lookups match the vanilla world.
+The Python comparator requires a single complete snapshot and rejects
+different hashes or missing output.
+
+To run this test locally (warning: it writes to `run/`):
+```sh
+XT9Y_TEST_LEVEL_NAME=xt9y-hotpath-parity-world \
+XT9Y_TEST_WORLDGEN_SNAPSHOT=1 XT9Y_TEST_PATH_ORACLE=1 \
+XT9Y263_PARITY=1 bash scripts/smoke_server.sh
+cp run/xt9y263-smoke.log baseline-hotpaths.log
+
+# Use a fresh test world with the same seed; do not delete your normal save.
+rm -rf run/xt9y-hotpath-parity-world
+XT9Y_TEST_LEVEL_NAME=xt9y-hotpath-parity-world \
+XT9Y_TEST_WORLDGEN_SNAPSHOT=1 XT9Y_TEST_PATH_ORACLE=1 \
+XT9Y_NATIVE_HOTPATHS=1 XT9Y263_PARITY=1 bash scripts/smoke_server.sh
+python3 scripts/compare_engine_parity.py baseline-hotpaths.log run/xt9y263-smoke.log
+```
+
+A passing oracle covers sampled states, not all possible modded blocks or
+worldgen structures. The `XT9Y_FPS_BENCH=1` and `XT9Y_TPS_BENCH=1`
+in-game benchmarks remain necessary for performance claims. In-world glyph
+coverage is separately opt-in via `XT9Y_REQUIRE_GLYPH_SMOKE=1`, because a
+fresh graphical client at its title screen never necessarily renders world text.
