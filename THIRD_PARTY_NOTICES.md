@@ -14,6 +14,7 @@ upstream distribution, but the performance stack as shipped is tested only as a 
 | Immediate rendering (client only) | ImmediatelyFast 1.17.1+26.3 Fabric | `5ZwdcRci:3MP9UR23` | LGPL-3.0-or-later | https://github.com/RaphiMC/ImmediatelyFast |
 | Block entity rendering (client only) | Optimized Block Entities 1.1.50 (26.3) | `AtOSAunf:nmIzJcIn` | LGPL-3.0-or-later | https://github.com/maDU59/OptimisedBlockEntities |
 | Memory footprint and allocation | FerriteCore 9.0.0 Fabric (26.3-compatible) | `uXXizFIs:d5ddUdiB` | MIT | https://github.com/malte0811/FerriteCore |
+| Startup, resource and memory optimization | ModernFix-mVUS 5.27.20+mc26.3 | `TjSm1wrD:iKbywnU7` | LGPL-3.0-only | https://github.com/coredex-source/ModernFix---mVUS |
 | Rust-assisted entity queries and cramming (experimental upstream release) | Ferrite 0.7.4-alpha+26.3 | `c2DHmFvV:UhO60CKq` | MIT | https://github.com/VoiceLessQ/Ferrite |
 
 Official licenses: https://www.gnu.org/licenses/lgpl-3.0.html and
