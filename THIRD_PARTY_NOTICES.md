@@ -47,3 +47,15 @@ archives remain inside those archives.
 - This bundle is a distribution/integration, not a rewrite of Sodium, Lithium,
   C2ME, ScalableLux, ImmediatelyFast or Ferrite; speedups belong to the
   corresponding upstream algorithms and original developers.
+
+## Source-port step 1: patched component map compaction
+
+The small empty-DataComponentMap patch optimization from FerriteCore was
+ported into `dev.xt9y.perf.mixin.ComponentMapCompactionMixin` (MIT, original
+source https://github.com/malte0811/FerriteCore). The original FerriteCore
+implementation of this exact feature is disabled via the upstream-supported
+`ferritecore:disabled_options` Fabric metadata key `dataComponentPatch`.
+This prevents duplicate mixins and retains its other unrelated optimizations.
+The port has the same observable behavior: a shared immutable empty map is
+used only when no patched components exist, with copy-on-write enabled so
+subsequent mutations allocate their own map.
