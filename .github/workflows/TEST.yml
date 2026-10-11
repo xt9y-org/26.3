@@ -34,3 +34,5 @@ jobs:
         with:
           gradle-version: '9.7.0'
       - run: gradle build --no-daemon
+      - name: Verify five real embedded performance modules
+        run: python3 scripts/check_bundle.py
