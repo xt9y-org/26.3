@@ -38,7 +38,7 @@ bash scripts/test_release_candidate.sh
 ```
 
 The script builds a version `1.0.0` candidate, runs unit tests and seeded
-Minecraft server correctness/lighting/worldgen/navigation checks, and performs
+Minecraft server correctness/lighting/generator-settings/navigation checks, and performs
 one real MSPT A/B run in temporary worlds. It leaves logs under `run/`.
 **It does not verify GPU pixel parity or modpack-wide compatibility.**
 
@@ -72,3 +72,19 @@ stable tag as the target version.
 If GitHub-hosted jobs fail before step 1 / have no assigned runner, restore
 organization Actions runners or billing limits before running this workflow.
 Those infrastructure failures are not evidence of a passing test.
+
+## Known verification limitations
+
+A fresh-world sampled block-state hash can differ between independent world
+startups, including at subterranean positions. The release gate therefore
+requires **exact cached sea-level equivalence** and **exact navigation-region
+block/fluid lookups**, while reporting a differing whole-world hash as
+**INCONCLUSIVE**. This is not a full chunk-generation equivalence proof.
+Set `XT9Y_REQUIRE_WORLD_HASH=1` for a strict, potentially failing experiment.
+
+The Ubuntu 26.3 SDL3 headless graphical smoke can initialize Mesa Lavapipe
+Vulkan but be unable to render the title frame within the software GPU time
+budget. Such runs are marked **INCONCLUSIVE**, never a graphical success;
+a stable release requires your explicit `hardware_client_tested=TESTED`
+attestation after testing on real hardware. Actual shader/output visual
+parity and real GPU FPS cannot be inferred from software Vulkan.
