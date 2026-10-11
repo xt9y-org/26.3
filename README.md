@@ -117,3 +117,21 @@ in each of the lit/dark phases. CI launches the same world seed with
 two fields to match exactly. This provides real lighting-correctness coverage
 for future lighting algorithm changes, but is not itself an optimized
 replacement for Minecraft's lighting engine.
+
+## Real Minecraft client FPS benchmark
+
+Launch Minecraft with `XT9Y_FPS_BENCH=1` and enter the same world, at the
+same camera position with the same graphics settings. A test-only recorder
+collects real client **frame intervals** from GameRenderer, skipping the
+first 120 in-world frames, then logging 1,800 frames' mean, P95 and P99
+frame times, average FPS and approximate 1% low FPS. No Rust/JNI calls are
+needed. Without this environment variable the recorder is dormant.
+
+To compare A/B on the same machine, restart once with
+`XT9Y_PERF_BASELINE=1 XT9Y_FPS_BENCH=1`, and once with
+`XT9Y_FPS_BENCH=1`; keep view distance, VSync, resolution, shaders,
+scene and player position unchanged. Disable VSync and FPS caps when
+measuring GPU throughput. One session is not statistical proof of a
+performance gain. A GPU graphical client pixel-equivalence test is
+still needed before the experimental framebuffer-binding patch is
+enabled by default.
