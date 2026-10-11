@@ -36,6 +36,17 @@ jobs:
         with:
           gradle-version: '9.7.0'
       - run: gradle build --no-daemon
+      - name: Verify actual rendered JAR includes GPL notices and client mixin
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from scripts.check_render_bundle import verify
+          jars = [p for p in Path("build/libs").glob("*.jar")
+                  if not any(s in p.name for s in ("-sources", "-dev", "-javadoc"))]
+          if len(jars) != 1:
+              raise RuntimeError(f"Expected one production Fabric JAR, got {jars}")
+          verify(jars[0])
+          PY
       - name: Boot Minecraft and verify all vanilla blockstate transitions
         run: |
           XT9Y_TEST_BLOCKSTATES=1 bash scripts/smoke_server.sh
