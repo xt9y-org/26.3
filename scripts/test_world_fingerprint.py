@@ -4,7 +4,7 @@ import unittest
 import zlib
 from pathlib import Path
 
-from world_fingerprint import NBT, compare, essential_chunk, fingerprint, read_region
+from world_fingerprint import NBT, compare, essential_chunk, fingerprint, read_region, read_world
 
 
 class ChunkParityTests(unittest.TestCase):
@@ -72,6 +72,11 @@ class ChunkParityTests(unittest.TestCase):
             read = read_region(path)
             self.assertIn((-32, 0), read)
             self.assertEqual(len(read[(-32, 0)]), 64)
+            namespaced = Path(directory) / "dimensions/minecraft/overworld/region"
+            namespaced.mkdir(parents=True)
+            (namespaced / path.name).write_bytes(path.read_bytes())
+            result = read_world(Path(directory))
+            self.assertEqual(result, read)
 
 
 if __name__ == "__main__":
