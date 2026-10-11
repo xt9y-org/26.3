@@ -95,8 +95,8 @@ jobs:
           name: world-parity-logs
           path: |
             run/xt9y263-smoke.log
-            baseline-world/region/
+            baseline-world/dimensions/minecraft/overworld/region/
             baseline-world/level.dat
-            run/world/region/
+            run/world/dimensions/minecraft/overworld/region/
             run/world/level.dat
           if-no-files-found: ignore
