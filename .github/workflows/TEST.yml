@@ -36,5 +36,7 @@ jobs:
         with:
           gradle-version: '9.7.0'
       - run: gradle build --no-daemon
-      - name: Boot actual Minecraft 26.3 dedicated server
-        run: bash scripts/smoke_server.sh
+      - name: Boot Minecraft and verify all vanilla blockstate transitions
+        run: |
+          XT9Y_TEST_BLOCKSTATES=1 bash scripts/smoke_server.sh
+          grep -q 'BlockState oracle passed' run/xt9y263-smoke.log

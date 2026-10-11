@@ -20,3 +20,13 @@ tickers after sign-editor and furnace-inventory transitions. The
 `TickerMixinPlugin` disables this mixin set when the upstream
 `ferrite` mod is present, preventing two implementations competing
 for the same redirect site. See bundled `MIT-Ferrite.txt`.
+
+## Source-port step 3: shared block-state neighbor table
+
+The FerriteCore (MIT) binary and mixed-radix fast map lookup was adapted
+into `dev.xt9y.perf.engine.blockstate` and wired into Minecraft's StateDefinition initialization.
+No external FerriteCore artifact is required. This implementation retains
+vanilla per-state property arrays (only neighbor lookup is replaced) to
+minimize mapping risk. If FerriteCore is installed separately, our mixin
+plugin skips this feature rather than competing for StateHolder overwrites.
+Exact source branch: https://github.com/malte0811/FerriteCore/tree/26.1

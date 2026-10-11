@@ -51,3 +51,12 @@ are not gated. These are ported into our own Java/mixin source from the
 MIT-licensed Ferrite Minecraft 26.3 implementation. When Ferrite is also
 installed, the ticker mixin set is disabled automatically to avoid duplicate
 redirections. No tick-frequency or quality reduction is introduced.
+
+### In-house block-state neighbour lookup
+
+Block-state neighbour tables are now backed by a shared indexed lookup
+instead of a separate per-state neighbor array. The port retains vanilla's
+property-value storage and is based on FerriteCore's MIT fast-map algorithm.
+Only exact property changes use the shared transition table; no worldgen,
+rendering quality or simulation values are intentionally changed.
+The optimization is automatically skipped if FerriteCore is installed.
