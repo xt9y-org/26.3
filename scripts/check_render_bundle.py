@@ -19,6 +19,7 @@ FILES = (
     "META-INF/sources/xt9y-rendering/RenderOptimizationPlugin.java",
     "META-INF/sources/xt9y-rendering/AppleFullBufferUploadMixin.java",
     "META-INF/licenses/LGPL-3.0-ImmediatelyFast.txt",
+    "META-INF/licenses/GPL-3.0-Companion.txt",
     "xt9y263-rendering.mixins.json",
     "fabric.mod.json",
 )
@@ -49,6 +50,9 @@ def verify(jar_path: Path) -> None:
 
         license_text = archive.read("META-INF/licenses/LGPL-3.0-ImmediatelyFast.txt").decode("utf-8")
         source = archive.read("META-INF/sources/xt9y-rendering/TextGlyphConsumerMixin.java").decode("utf-8")
+        gpl_text = archive.read("META-INF/licenses/GPL-3.0-Companion.txt").decode("utf-8")
+        if not gpl_text.startswith("GNU GENERAL PUBLIC LICENSE"):
+            raise ValueError("GPLv3 companion license text missing from distributed JAR")
         if "GNU LESSER GENERAL PUBLIC LICENSE" not in license_text:
             raise ValueError("LGPL text missing from distributed JAR")
         if "ImmediatelyFast" not in source or "getVertexBuilder" not in source:
