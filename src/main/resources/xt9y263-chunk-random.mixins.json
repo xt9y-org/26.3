@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "dev.xt9y.perf.mixin.randomtick",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "dev.xt9y.perf.mixin.randomtick.ChunkRandomMixinPlugin",
+  "mixins": [
+    "LevelMixin",
+    "ServerLevelMixin",
+    "LevelRandomAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

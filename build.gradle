@@ -37,6 +37,15 @@ tasks.register('stageNative', Sync) {
 def modVersion = version.toString()
 processResources {
     dependsOn tasks.named('stageNative')
+    // Source is bundled for LGPL recipients: no separate performance mod download.
+    from('src/main/java/dev/xt9y/perf/mixin/randomtick') {
+        include 'LevelMixin.java', 'ServerLevelMixin.java'
+        into 'META-INF/sources/xt9y-chunk-random/mixins'
+    }
+    from('src/main/java/dev/xt9y/perf/engine/randomtick') {
+        include '*.java'
+        into 'META-INF/sources/xt9y-chunk-random'
+    }
     from(layout.buildDirectory.dir('generated/native'))
     inputs.property 'version', modVersion
     filesMatching('fabric.mod.json') { expand version: modVersion }

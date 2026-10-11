@@ -80,3 +80,15 @@ graphics-quality setting. The normal release enables the lossless optimizations.
 CI now launches both the optimized and baseline modes and verifies that all
 registered vanilla block-state property transitions remain identical. Note that
 startup/oracle timings alone are not a meaningful FPS or TPS speedup benchmark.
+
+### Lossless chunk random-tick allocation reduction
+
+The server's chunk random-tick path now reuses one mutable block position when
+calculating random tick coordinates, instead of allocating a temporary position
+on every lookup. Position objects handed to block and fluid random-tick methods
+are made immutable to prevent escaping a reused mutable object. The vanilla
+random-number sequence is unchanged, verified by an exhaustive 32,768-call
+oracle in the actual Minecraft 26.3 server. Adapted under LGPL-3.0 from
+Lithium's 26.3 allocation optimization; full source and license are embedded.
+The mixins are skipped automatically if Lithium is installed separately, and
+`XT9Y_PERF_BASELINE=1` disables the optimization for comparisons.
