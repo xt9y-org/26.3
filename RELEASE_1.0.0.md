@@ -17,9 +17,11 @@ Fabric API are still required.
 - Native profiler (FPS, MSPT, heap, chunk events), disabled until opened.
 - Real opt-in FPS and server MSPT benchmarking support.
 
-Additional worldgen sea-level and navigation-region chunk access optimizations
-are **experimental and off by default**. Enable only for testing with
-`XT9Y_NATIVE_HOTPATHS=1` after preserving a backup of your world.
+The optional worldgen sea-level setting cache remains experimental and off by
+default (enable with `XT9Y_NATIVE_HOTPATHS=1` only when testing). The
+custom AI path-navigation rewrite has been removed entirely after a report
+of aquatic mobs accumulating at the water surface. Vanilla pathfinding is
+now retained in every mode.
 
 ## Not included as complete engine rewrites
 
@@ -77,7 +79,7 @@ Those infrastructure failures are not evidence of a passing test.
 
 A fresh-world sampled block-state hash can differ between independent world
 startups, including at subterranean positions. The release gate therefore
-requires **exact cached sea-level equivalence** and **exact navigation-region
+requires **exact cached sea-level equivalence** and **exact vanilla navigation-region
 block/fluid lookups**, while reporting a differing whole-world hash as
 **INCONCLUSIVE**. This is not a full chunk-generation equivalence proof.
 Set `XT9Y_REQUIRE_WORLD_HASH=1` for a strict, potentially failing experiment.
