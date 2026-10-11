@@ -41,3 +41,13 @@ For high-impact whole-game performance improvements, use verified Minecraft 26.3
 **Empty data-component map compaction:** when an item's patched component map becomes empty, Minecraft now reuses a shared immutable empty map instead of retaining a per-object mutable map. Its copy-on-write flag ensures later component edits work normally. This optimization is implemented directly in our own `ComponentMapCompactionMixin.java` source, adapted from FerriteCore under MIT. The upstream duplicate is disabled automatically if FerriteCore is separately installed.
 
 No item behavior or quality settings are changed. A real Minecraft 26.3 dedicated-server boot is included in CI to catch invalid mixin hooks. This is one limited memory optimization, not a complete rewrite of the chunk, lighting, renderer, and entity engines.
+
+### In-house entity-tick optimization
+
+Exact vanilla sign and furnace block entity classes no longer register a ticker
+when proven idle. Editing a sign and changing furnace fuel/input force a
+re-evaluation so useful ticks are restored. Mod subclass block entities
+are not gated. These are ported into our own Java/mixin source from the
+MIT-licensed Ferrite Minecraft 26.3 implementation. When Ferrite is also
+installed, the ticker mixin set is disabled automatically to avoid duplicate
+redirections. No tick-frequency or quality reduction is introduced.
