@@ -18,11 +18,15 @@ def parse(log: str) -> tuple[int, str, int, int]:
     world = WORLD.findall(log)
     path = PATH.findall(log)
     sea = SEA.findall(log)
-    if len(world) != 1 or len(path) != 1 or len(sea) != 1:
+    boundaries = WATER_BOUNDARY.findall(log)
+    if len(world) != 1 or len(path) != 1 or len(sea) != 1 or len(boundaries) != 1:
         raise ValueError("Missing or duplicate actual engine oracle results")
     count, digest = world[0]
     checked = int(path[0])
     actual, expected = (int(n) for n in sea[0])
+    boundary_count, wet_count = map(int, boundaries[0])
+    if boundary_count < 1000 or wet_count < 0:
+        raise ValueError("Insufficient sea-surface navigation boundary coverage")
     if int(count) < 1000 or checked < 1000:
         raise ValueError("Insufficient block-state/pathfinding samples")
     if actual != expected:
