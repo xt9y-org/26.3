@@ -91,7 +91,10 @@ jobs:
           set -euo pipefail
           echo "Generated worlds:"
           find . -maxdepth 8 -name level.dat -type f -print
-          save_file="$(find . -maxdepth 8 -name level.dat -type f ! -path './baseline-world/*' | head -n 1)"
+          # Explicitly select the optimized save. An earlier discovery step
+          # could pick baseline-control/level.dat and compare vanilla to itself.
+          save_file="$(find run -maxdepth 8 -name level.dat -type f | head -n 1)"
+          test "$(realpath "$save_file")" != "$(realpath baseline-control/level.dat)"
           test -n "$save_file"
           echo "Baseline save files:"
           find baseline-world -maxdepth 5 -type f | head -n 120
