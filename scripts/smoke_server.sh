@@ -33,7 +33,13 @@ exec 3>"$fifo"
 for second in $(seq 1 240); do
   if grep -Eq 'Done \([^)]+\)!|Done \(' "$log"; then
     echo "Server startup succeeded after $second seconds."
-    printf 'save-all\nstop\n' >&3
+    if [[ "${XT9Y263_PARITY:-0}" == "1" ]]; then
+      # Spawn chunks alone are not necessarily persisted in 26.3.
+      # Force 169 chunks from -6..+6 in both axes, then wait for generation.
+      printf 'forceload add -96 -96 96 96\n' >&3
+      sleep 25
+    fi
+    printf 'save-all flush\nstop\n' >&3
     exec 3>&-
     for _ in $(seq 1 30); do
       if ! kill -0 "$launcher" 2>/dev/null; then
