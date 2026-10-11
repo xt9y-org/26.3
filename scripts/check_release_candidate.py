@@ -41,6 +41,18 @@ def verify(jar: Path, version: str, universal: bool = False) -> None:
         names = z.namelist()
         if len(names) != len(set(names)):
             raise ValueError("Duplicate ZIP entry in release archive")
+        # One-file install must not silently bundle the previously rejected
+        # eight-engine experimental stack. The ImGui GUI library is allowed.
+        upstream_engines = (
+            "c2me", "lithium", "scalablelux", "immediatelyfast",
+            "modernfix", "ferritecore", "ferrite", "optimizedblockentities",
+        )
+        for name in names:
+            if name.lower().endswith(".jar") and any(
+                engine in name.rsplit("/", 1)[-1].lower()
+                for engine in upstream_engines
+            ):
+                raise ValueError(f"Rejected bundled performance engine: {name}")
         if z.testzip() is not None:
             raise ValueError("Corrupt entry in release archive")
         manifest = json.loads(z.read("fabric.mod.json"))
