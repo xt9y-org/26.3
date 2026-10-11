@@ -84,6 +84,10 @@ jobs:
           find . -maxdepth 8 -name level.dat -type f -print
           save_file="$(find . -maxdepth 8 -name level.dat -type f ! -path './baseline-world/*' | head -n 1)"
           test -n "$save_file"
+          echo "Baseline save files:"
+          find baseline-world -maxdepth 5 -type f | head -n 120
+          echo "Optimized save files:"
+          find "$(dirname "$save_file")" -maxdepth 5 -type f | head -n 120
           python3 scripts/world_fingerprint.py baseline-world "$(dirname "$save_file")" --minimum 8
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -91,5 +95,8 @@ jobs:
           name: world-parity-logs
           path: |
             run/xt9y263-smoke.log
-            run-baseline/xt9y263-smoke.log
+            baseline-world/region/
+            baseline-world/level.dat
+            run/world/region/
+            run/world/level.dat
           if-no-files-found: ignore
