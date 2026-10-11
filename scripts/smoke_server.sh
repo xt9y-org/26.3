@@ -36,10 +36,18 @@ for second in $(seq 1 240); do
     if [[ "${XT9Y263_PARITY:-0}" == "1" ]]; then
       # Spawn chunks alone are not necessarily persisted in 26.3.
       # Force 169 chunks from -6..+6 in both axes, then wait for generation.
-      printf 'forceload add -96 -96 96 96\n' >&3
+      if ! printf 'forceload add -96 -96 96 96\n' >&3; then
+        echo "Server quit before forceload" >&2
+        tail -n 140 "$log"
+        exit 1
+      fi
       sleep 25
     fi
-    printf 'save-all flush\nstop\n' >&3
+    if ! printf 'save-all flush\nstop\n' >&3; then
+      echo "Server quit before save/stop" >&2
+      tail -n 140 "$log"
+      exit 1
+    fi
     exec 3>&-
     for _ in $(seq 1 30); do
       if ! kill -0 "$launcher" 2>/dev/null; then

@@ -42,9 +42,8 @@ public final class LightingOracle {
                                 Blocks.OBSIDIAN.defaultBlockState(), 3);
             }
 
-            // Drain pending updates on the server thread before each state
-            // observation. Both baseline and optimized runs perform this.
-            level.getChunkSource().getLightEngine().runLightUpdates();
+            // Observe normal asynchronous Minecraft propagation. Never
+            // force-drain the light engine from this test callback.
 
             if (!oracle.removed) {
                 if (tick >= 12
