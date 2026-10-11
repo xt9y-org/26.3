@@ -25,6 +25,8 @@ public final class PerfMod implements ModInitializer {
         }
         if ("1".equals(System.getenv("XT9Y_TEST_LIGHT_ORACLE")))
             dev.xt9y.perf.testing.LightingOracle.register();
+        if ("1".equals(System.getenv("XT9Y_TPS_BENCH")))
+            dev.xt9y.perf.testing.ServerTickBenchmark.register();
         // No native loading, file IO, or sampling until the debugger is opened.
         final long[] started = {0};
         ServerTickEvents.START_SERVER_TICK.register(server -> {
