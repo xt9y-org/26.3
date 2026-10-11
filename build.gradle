@@ -50,6 +50,18 @@ processResources {
         include '*.java'
         into 'META-INF/sources/xt9y-rendering'
     }
+    from('src/main/java/dev/xt9y/perf/mixin/worldgen') {
+        include '*.java'
+        into 'META-INF/sources/xt9y-engine-hotpaths/worldgen'
+    }
+    from('src/main/java/dev/xt9y/perf/mixin/pathing') {
+        include '*.java'
+        into 'META-INF/sources/xt9y-engine-hotpaths/pathing'
+    }
+    from('src/main/java/dev/xt9y/perf/mixin/hotpath') {
+        include '*.java'
+        into 'META-INF/sources/xt9y-engine-hotpaths/hotpath'
+    }
     from(layout.buildDirectory.dir('generated/native'))
     inputs.property 'version', modVersion
     filesMatching('fabric.mod.json') { expand version: modVersion }
