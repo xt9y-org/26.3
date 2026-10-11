@@ -1,6 +1,7 @@
 name: TEST
 on:
   push:
+    branches: [main]
   pull_request:
 jobs:
   rust:
@@ -34,3 +35,90 @@ jobs:
         with:
           gradle-version: '9.7.0'
       - run: gradle build --no-daemon
+      - name: Verify six actual bundled performance engines
+        run: python3 scripts/check_bundle.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-stack-binary
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+          if-no-files-found: ignore
+      - name: Boot Minecraft server and verify mod compatibility
+        run: bash scripts/smoke_server.sh
+
+  parity:
+    name: Vanilla vs optimized terrain and lighting
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.7.0'
+      - name: Generate seed 73452981 using baseline Fabric + vanilla engines
+        run: XT9Y263_PARITY=1 bash scripts/smoke_server.sh -Pxt9yDisableEngines=true
+      - name: Preserve baseline Anvil world
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Discovering Minecraft world directories:"
+          find . -maxdepth 8 -name level.dat -type f -print
+          save_file="$(find . -maxdepth 8 -name level.dat -type f | head -n 1)"
+          test -n "$save_file"
+          save_dir="$(dirname "$save_file")"
+          echo "Backing up vanilla test world: $save_dir"
+          cp run/xt9y263-smoke.log baseline-smoke.log
+          mv "$save_dir" baseline-world
+      - name: Repeat seed 73452981 with vanilla for nondeterminism control
+        run: XT9Y263_PARITY=1 bash scripts/smoke_server.sh -Pxt9yDisableEngines=true
+      - name: Preserve vanilla control
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp run/xt9y263-smoke.log control-smoke.log
+          mv run/world baseline-control
+      - name: DIAGNOSTIC generate optimized world without C2ME and ScalableLux
+        run: XT9Y263_PARITY=1 bash scripts/smoke_server.sh -Pxt9yDisableC2ME=true -Pxt9yDisableScalableLux=true
+      - name: Verify lossless block, biome, heightmap and lighting output
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Generated worlds:"
+          find . -maxdepth 8 -name level.dat -type f -print
+          # Explicitly select the optimized save. An earlier discovery step
+          # could pick baseline-control/level.dat and compare vanilla to itself.
+          save_file="$(find run -maxdepth 8 -name level.dat -type f | head -n 1)"
+          test "$(realpath "$save_file")" != "$(realpath baseline-control/level.dat)"
+          test -n "$save_file"
+          echo "Baseline save files:"
+          find baseline-world -maxdepth 5 -type f | head -n 120
+          echo "Optimized save files:"
+          find "$(dirname "$save_file")" -maxdepth 5 -type f | head -n 120
+          python3 scripts/check_world_seed.py 73452981 baseline-world baseline-control "$(dirname "$save_file")"
+          python3 scripts/performance_summary.py baseline-smoke.log run/xt9y263-smoke.log control-smoke.log
+          python3 scripts/world_semantics.py baseline-world "$(dirname "$save_file")" --control baseline-control
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: world-parity-logs
+          path: |
+            run/xt9y263-smoke.log
+            baseline-world/dimensions/minecraft/overworld/region/
+            baseline-control/dimensions/minecraft/overworld/region/
+            baseline-world/level.dat
+            baseline-world/data/minecraft/world_gen_settings.dat
+            baseline-control/level.dat
+            baseline-control/data/minecraft/world_gen_settings.dat
+            run/world/data/minecraft/world_gen_settings.dat
+            baseline-smoke.log
+            control-smoke.log
+            run/world/dimensions/minecraft/overworld/region/
+            run/world/level.dat
+          if-no-files-found: ignore

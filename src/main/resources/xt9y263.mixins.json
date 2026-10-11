@@ -2,6 +2,13 @@
   "required": true,
   "package": "dev.xt9y.perf.mixin",
   "compatibilityLevel": "JAVA_25",
-  "client": ["GameRendererMixin"],
-  "injectors": {"defaultRequire": 1}
+  "client": [
+    "GameRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": [
+    "ComponentMapCompactionMixin"
+  ]
 }
