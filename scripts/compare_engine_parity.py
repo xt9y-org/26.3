@@ -26,7 +26,7 @@ def parse(log: str) -> tuple[int, str, int, int]:
     checked = int(path[0])
     actual, expected = (int(n) for n in sea[0])
     boundary_count, wet_count = map(int, boundaries[0])
-    if boundary_count < 1000 or wet_count < 0:
+    if boundary_count < 1000 or wet_count == 0:
         raise ValueError("Insufficient sea-surface navigation boundary coverage")
     if int(count) < 1000 or checked < 1000:
         raise ValueError("Insufficient block-state/pathfinding samples")
