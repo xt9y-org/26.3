@@ -111,7 +111,7 @@ def fingerprint(root: dict) -> str | None:
     return hashlib.sha256(stable.encode()).hexdigest()
 
 
-def read_region(path: Path) -> dict[tuple[int, int], str]:
+def read_region(path: Path, transform=fingerprint) -> dict[tuple[int, int], str]:
     match = re.fullmatch(r"r\.(-?\d+)\.(-?\d+)\.mca", path.name)
     if not match:
         return {}
@@ -142,7 +142,7 @@ def read_region(path: Path) -> dict[tuple[int, int], str]:
             raw = payload
         else:
             raise ValueError(f"Unsupported Anvil compression codec {codec}")
-        digest = fingerprint(NBT(raw).root())
+        digest = transform(NBT(raw).root())
         if digest is None:
             continue
         x = rx * 32 + (slot % 32)
@@ -151,7 +151,7 @@ def read_region(path: Path) -> dict[tuple[int, int], str]:
     return results
 
 
-def read_world(world: Path) -> dict[tuple[int, int], str]:
+def read_world(world: Path, transform=fingerprint) -> dict[tuple[int, int], str]:
     # Minecraft 26.3 stores even the Overworld in its namespaced dimension
     # directory; older versions use the root-level region/ directory.
     candidates = [
@@ -163,7 +163,7 @@ def read_world(world: Path) -> dict[tuple[int, int], str]:
             continue
         result = {}
         for path in sorted(directory.glob("r.*.*.mca")):
-            result.update(read_region(path))
+            result.update(read_region(path, transform))
         if result:
             return result
     raise ValueError(
