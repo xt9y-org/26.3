@@ -97,3 +97,8 @@ zero, invoke `DirectStateAccess.bufferData` rather than
 OpenGL upload bottleneck, not Metal. Client correctness and frame-time
 measurements on real Apple hardware remain required.
 Full adapted source is embedded at `META-INF/sources/xt9y-rendering/`.
+
+The LGPL-3.0-or-later ImmediatelyFast-derived sources also include the
+full GNU GPL version 3 companion text required by LGPLv3, distributed in
+`META-INF/licenses/GPL-3.0-Companion.txt`. Both license texts and
+modifiable Java source are retained in the universal Fabric JAR.
