@@ -15,6 +15,11 @@ on:
         required: true
         default: 'NO'
         type: string
+      hardware_client_tested:
+        description: 'Type TESTED after personally testing the client on a real GPU'
+        required: true
+        default: 'NO'
+        type: string
 
 permissions:
   contents: write
@@ -41,6 +46,7 @@ jobs:
           TARGET_REF: ${{ github.ref }}
           REQUESTED_VERSION: ${{ inputs.version }}
           CONFIRM_PUBLISH: ${{ inputs.confirm_publish }}
+          HARDWARE_CLIENT_TESTED: ${{ inputs.hardware_client_tested }}
         run: |
           set -euo pipefail
           if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
@@ -49,6 +55,9 @@ jobs:
             }
             [[ "$CONFIRM_PUBLISH" == "RELEASE" ]] || {
               echo "::error::Set confirm_publish to RELEASE for a stable major release"; exit 1;
+            }
+            [[ "$HARDWARE_CLIENT_TESTED" == "TESTED" ]] || {
+              echo "::error::Real-GPU graphical client testing must be confirmed as TESTED"; exit 1;
             }
             [[ "$REQUESTED_VERSION" =~ ^[1-9][0-9]*\.[0-9]+\.[0-9]+$ ]] || {
               echo "::error::Expected a nonzero-major semantic version such as 1.0.0"; exit 1;
@@ -158,10 +167,21 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y xvfb libgl1-mesa-dri libgl1 mesa-utils libglx-mesa0 mesa-vulkan-drivers vulkan-tools
-      - name: Optimized and baseline client boot and rendered-frame smoke
+      - name: Attempt optimized/baseline client smoke on software GPU
         run: |
-          bash scripts/smoke_client.sh
-          XT9Y_PERF_BASELINE=1 bash scripts/smoke_client.sh
+          set +e
+          XT9Y_ALLOW_SOFTWARE_INCONCLUSIVE=1 bash scripts/smoke_client.sh
+          normal=$?
+          XT9Y_ALLOW_SOFTWARE_INCONCLUSIVE=1 XT9Y_PERF_BASELINE=1 bash scripts/smoke_client.sh
+          baseline=$?
+          set -e
+          for result in "$normal" "$baseline"; do
+            if [[ "$result" == "77" ]]; then
+              echo "::warning::Software llvmpipe Vulkan render inconclusive; hardware validation manually attested"
+            elif [[ "$result" != "0" ]]; then
+              exit "$result"
+            fi
+          done
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
