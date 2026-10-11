@@ -180,48 +180,38 @@ a separate fixture (`XT9Y_REQUIRE_GLYPH_SMOKE=1`). This is a startup/hook
 correctness check, **not** a visual pixel-parity test or real-GPU benchmark.
 
 
-## Experimental worldgen and pathfinding hot paths
+## Experimental generator setting cache; vanilla mob navigation
 
-`XT9Y_NATIVE_HOTPATHS=1` enables two direct-source, LGPL-compatible
-Minecraft hot paths (no extra Lithium JAR):
-- **Chunk generator:** cache the immutable sea-level setting after lazy registry
-  binding rather than resolve its holder for every generator call.
-- **AI pathfinding:** flatten `PathNavigationRegion` chunk arrays and read the
-  exact vanilla block/fluid state from loaded chunk sections.
+`XT9Y_NATIVE_HOTPATHS=1` now enables **only** the lazy sea-level
+setting cache in `NoiseBasedChunkGenerator`. The custom
+`PathNavigationRegionMixin` AI/pathfinding block/fluid lookup replacement
+was **removed**, including from opt-in mode. Swimming, drowning,
+navigation, water-surface avoidance, and entity behavior use Minecraft's
+native vanilla code instead.
 
-These are **not** a multithreaded chunk generator, full AI rewrite, complete
-light engine, or a terrain mesh renderer. Source is shipped in the JAR and
-the optimizations are disabled by default until a real Minecraft build,
-worldgen/path oracle and performance A/B testing pass. Baseline mode
-`XT9Y_PERF_BASELINE=1` and separately installed Lithium disable both mixins.
+This is a gameplay-safety rollback following a report of aquatic mobs
+accumulating at the water surface. The original CI test sampled block and
+fluid state data but did not simulate actual mob movement or swimming.
+The rollback is deliberately not presented as proof of the root cause.
+The normal dev-25 release did not enable this experimental mixin unless
+`XT9Y_NATIVE_HOTPATHS=1` was set. If the issue also occurs with
+`XT9Y_PERF_BASELINE=1`, investigate the remaining optimization mixins
+and other installed mods before assigning causality.
 
-On a testing machine, launch Minecraft with
-`XT9Y_NATIVE_HOTPATHS=1` and verify pathfinding mobs in an existing
-**backup** of a world first. For a reproducible fresh-world server parity
-test, CI runs two Minecraft 26.3 servers with identical seed
-`73452981` and 169 force-loaded chunks. It checks exact generator sea-level
-settings and verifies `PathNavigationRegion` block/fluid lookups against
-real world block states. Sampled block-state hashes are also recorded.
-Different fresh-world hashes are reported **INCONCLUSIVE**, not described
-as equivalent; `XT9Y_REQUIRE_WORLD_HASH=1` enables strict rejection.
-The Python comparator always fails for missing or incorrect engine oracle data.
+CI continues to compare real `PathNavigationRegion` vanilla block/fluid
+lookups against world state, now sampling each Y level around sea level.
+It also rejects any production JAR registering or containing the retired
+pathfinding mixin. The vanilla oracle cannot prove arbitrary mob AI
+behaviour, so manual water-mob testing remains mandatory.
 
-To run this test locally on macOS or Linux without touching a regular
-save, use one command:
+To run the seeded world and navigation oracle in disposable worlds:
+
 ```sh
 bash scripts/test_engine_parity.sh
 ```
-The script uses two unique temporary worlds with the same seed, compares
-sea-level settings and exact path/fluid queries, reports sampled hash equality
-or inconclusiveness, and saves both logs under `run/`.
-Set `XT9Y_KEEP_PARITY_WORLDS=1` if the generated worlds should remain for
-manual inspection.
 
-A passing oracle covers sampled states, not all possible modded blocks or
-worldgen structures. The `XT9Y_FPS_BENCH=1` and `XT9Y_TPS_BENCH=1`
-in-game benchmarks remain necessary for performance claims. In-world glyph
-coverage is separately opt-in via `XT9Y_REQUIRE_GLYPH_SMOKE=1`, because a
-fresh graphical client at its title screen never necessarily renders world text.
+`XT9Y_FPS_BENCH=1` and `XT9Y_TPS_BENCH=1` remain available for
+actual gameplay performance measurements.
 
 ## Major stable v1.0.0 candidate
 
