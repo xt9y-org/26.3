@@ -41,11 +41,8 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           from scripts.check_render_bundle import verify
-          jars = [p for p in Path("build/libs").glob("*.jar")
-                  if not any(s in p.name for s in ("-sources", "-dev", "-javadoc"))]
-          if len(jars) != 1:
-              raise RuntimeError(f"Expected one production Fabric JAR, got {jars}")
-          verify(jars[0])
+          from scripts.check_release_candidate import find_jar
+          verify(find_jar(Path("build/libs")))
           PY
       - name: Boot Minecraft and verify all vanilla blockstate transitions
         run: |
@@ -83,21 +80,15 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.7.0'
-      - name: Record vanilla light propagation, same world seed
-        run: |
-          XT9Y_TEST_LIGHT_ORACLE=1 XT9Y_PERF_BASELINE=1 XT9Y263_PARITY=1 bash scripts/smoke_server.sh
-          cp run/xt9y263-smoke.log baseline-light.log
-          rm -rf run/world
-      - name: Record optimized light propagation
-        run: XT9Y_TEST_LIGHT_ORACLE=1 XT9Y263_PARITY=1 bash scripts/smoke_server.sh
-      - name: Assert exactly identical block and skylight values
-        run: python3 scripts/check_lighting.py baseline-light.log run/xt9y263-smoke.log
+      - name: Compare real Minecraft lighting across isolated worlds
+        run: bash scripts/test_lighting_parity.sh
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: light-parity-logs
           path: |
-            baseline-light.log
+            run/xt9y-light-baseline.log
+            run/xt9y-light-optimized.log
             run/xt9y263-smoke.log
           if-no-files-found: ignore
 
@@ -119,7 +110,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y xvfb libgl1-mesa-dri libgl1 mesa-utils
-      - name: Launch actual client, execute glyph mixin and render frame
+      - name: Boot actual graphical client and render a complete frame
         run: bash scripts/smoke_client.sh
       - name: Reboot client with optimization disabled, validate baseline
         run: XT9Y_PERF_BASELINE=1 bash scripts/smoke_client.sh
@@ -146,26 +137,17 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.7.0'
-      - name: Baseline Minecraft server, seed 73452981
-        run: |
-          XT9Y_TPS_BENCH=1 XT9Y_BENCH_SECONDS=60 XT9Y_PERF_BASELINE=1 XT9Y263_PARITY=1 bash scripts/smoke_server.sh
-          cp run/xt9y263-smoke.log baseline.log
-          rm -rf run/world
-      - name: Optimized Minecraft server, identical forced-chunk workload
-        run: XT9Y_TPS_BENCH=1 XT9Y_BENCH_SECONDS=60 XT9Y263_PARITY=1 bash scripts/smoke_server.sh
-      - name: Report actual tick-time distributions
-        run: |
-          set -euo pipefail
-          grep -q 'XT9Y_TPS_BENCH count=' baseline.log
-          grep -q 'XT9Y_TPS_BENCH count=' run/xt9y263-smoke.log
-          python3 scripts/compare_tick_bench.py baseline.log run/xt9y263-smoke.log | tee benchmark.md
-          cat benchmark.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Measure and report actual isolated-world server MSPT
+        run: bash scripts/test_tick_benchmark.sh | tee benchmark.md
+      - name: Add benchmark to run summary
+        run: cat benchmark.md >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: minecraft-real-mspt
           path: |
-            baseline.log
+            run/xt9y-mspt-baseline.log
+            run/xt9y-mspt-optimized.log
             run/xt9y263-smoke.log
             benchmark.md
           if-no-files-found: ignore
