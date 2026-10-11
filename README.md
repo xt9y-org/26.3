@@ -13,6 +13,7 @@ A **single universal Fabric JAR** with a lossless-targeting performance stack an
 | Client rendering | ImmediatelyFast 1.17.1 (26.3) | Faster immediate-mode rendering; **not a replacement for Sodium's chunk renderer** |
 | Block entity rendering | Optimized Block Entities 1.1.50 (26.3) | Faster rendering for static chests, signs, beds, campfires and similar block entities while preserving animated transitions |
 | Memory | FerriteCore 9.0.0 (26.3-compatible) | Less memory use and allocation pressure |
+| Startup and resource loading | ModernFix-mVUS 5.27.20 (26.3) | Faster startup, resource handling, memory and initialization |
 
 **Source attribution and full legal details:** [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). C2ME's proprietary OpenCL module is **not** bundled and is excluded by an automated package checker.
 
@@ -38,12 +39,12 @@ Requires Java 25, Gradle 9.7, Rust stable:
 gradle build
 ```
 
-Use `-Pxt9yDisableEngines=true` to build a **vanilla-mechanics baseline** for A/B parity and performance comparisons without the seven bundled engines.
+Use `-Pxt9yDisableEngines=true` to build a **vanilla-mechanics baseline** for A/B parity and performance comparisons without the eight bundled engines.
 
 CI checks Rust, builds the universal JAR, validates the embedded mod IDs and licenses, starts a real Minecraft dedicated server, and compares deterministic Anvil chunk terrain, biome and light data against the baseline. The world comparator is in `scripts/world_fingerprint.py`.
 
 ## Limitations and next engineering stages
 
-The seven upstream engines cover substantial parts of all four requested areas, but this is **not a fully independent reimplementation** of Minecraft rendering and simulation. Major outstanding work includes chunk mesh renderer replacement (Sodium-equivalent), head-to-head FPS/1% low benchmarks in a real client, multi-seed terrain/structure/light oracle tests, and entity simulation parity on adversarial farm/modded workloads.
+The eight upstream engines cover substantial parts of all four requested areas, but this is **not a fully independent reimplementation** of Minecraft rendering and simulation. Major outstanding work includes chunk mesh renderer replacement (Sodium-equivalent), head-to-head FPS/1% low benchmarks in a real client, multi-seed terrain/structure/light oracle tests, and entity simulation parity on adversarial farm/modded workloads.
 
 Never describe compilation or a startup smoke test as proof of quality equivalence or FPS uplift. Compare against vanilla and retain a rollback path.
