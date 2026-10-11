@@ -157,7 +157,7 @@ jobs:
       - name: Install Mesa software OpenGL and Xvfb
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y xvfb libgl1-mesa-dri libgl1 mesa-utils
+          sudo apt-get install -y xvfb libgl1-mesa-dri libgl1 mesa-utils libglx-mesa0 mesa-vulkan-drivers vulkan-tools
       - name: Optimized and baseline client boot and rendered-frame smoke
         run: |
           bash scripts/smoke_client.sh
