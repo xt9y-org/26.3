@@ -15,6 +15,10 @@ public final class PerfClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        if (ClientFrameBenchmark.ACTIVE) {
+            net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STOPPING
+                    .register(mc -> ClientFrameBenchmark.finish());
+        }
         KeyMapping toggle = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.xt9y263.debug", InputConstants.Type.KEYBOARD,
                 InputConstants.KEY_RSHIFT, CATEGORY));

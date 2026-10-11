@@ -24,6 +24,8 @@ public final class GameRendererMixin {
 
     @Inject(method = "render", at = @At("HEAD"))
     private void xt9y263$beforeRender(CallbackInfo ci) {
+        if (dev.xt9y.perf.client.ClientFrameBenchmark.ACTIVE && minecraft.player != null)
+            dev.xt9y.perf.client.ClientFrameBenchmark.frame();
         if (!PerformanceState.active()) {
             xt9y263$previousFrameNs = 0;
             return;
