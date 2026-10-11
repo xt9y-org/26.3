@@ -4,7 +4,7 @@ set -euo pipefail
 # Dedicated-server smoke only. This is not yet a performance or parity test.
 mkdir -p run
 printf 'eula=true\n' > run/eula.txt
-cat > run/server.properties <<'PROPERTIES'
+cat > run/server.properties <<PROPERTIES
 level-seed=73452981
 level-type=minecraft:normal
 level-name=${XT9Y_TEST_LEVEL_NAME:-world}
