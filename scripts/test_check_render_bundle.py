@@ -26,7 +26,7 @@ class RenderBundleTests(unittest.TestCase):
                 elif filename == "xt9y263-rendering.mixins.json":
                     value = json.dumps({
                         "mixins": [],
-                        "client": ["TextGlyphConsumerMixin", "AppleFullBufferUploadMixin"],
+                        "client": ["TextGlyphConsumerMixin", "AppleFullBufferUploadMixin", "RenderTypeFeatureRendererAccessor"],
                         "plugin": "example.RenderOptimizationPlugin",
                     })
                 elif filename.endswith("ImmediatelyFast.txt"):
