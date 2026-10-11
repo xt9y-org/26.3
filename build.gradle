@@ -18,8 +18,11 @@ dependencies {
     // Lossless-targeting engine optimizations. Pin specific 26.3 Fabric releases.
     // Keep each upstream mod as its own nested JAR with its own metadata,
     // mixins, license and independent update path; never merge class files.
-    implementation    "maven.modrinth:VSNURh3q:cfKRtp0m" // C2ME: chunk generation/scheduling
-    include        "maven.modrinth:VSNURh3q:cfKRtp0m"
+    // Diagnostic isolation: do not suppress C2ME in the normal release build.
+    if (!providers.gradleProperty('xt9yDisableC2ME').isPresent()) {
+        implementation "maven.modrinth:VSNURh3q:cfKRtp0m" // C2ME
+        include        "maven.modrinth:VSNURh3q:cfKRtp0m"
+    }
     implementation    "maven.modrinth:Ps1zyz6x:g4eqNSKd" // ScalableLux: skylight/blocklight
     include        "maven.modrinth:Ps1zyz6x:g4eqNSKd"
     implementation    "maven.modrinth:gvQqBUqZ:xS0Q8LSi" // Lithium: entity/game logic
