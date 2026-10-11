@@ -37,8 +37,9 @@ def report(baseline: int, optimized: int, control: int | None = None) -> str:
     lines += [
         f"Optimized run: {optimized} ms",
         f"Baseline mean / optimized: {baseline_mean / optimized:.2f}x",
-        "One or two vanilla cold runs are insufficient to prove repeatable speedup. "
-        "These timings exclude client rendering FPS and sustained server TPS.",
+        "This is NOT a claim of repeatable speedup: one or two vanilla cold "
+        "runs are insufficient. These timings exclude client rendering FPS "
+        "and sustained server TPS.",
     ]
     return "\n".join(lines)
 
