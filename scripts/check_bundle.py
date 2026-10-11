@@ -16,7 +16,8 @@ REQUIRED = {
     "c2me": "chunk generation / scheduling",
     "scalablelux": "lighting",
     "lithium": "entity ticking and game logic",
-    "immediatelyfast": "client rendering",
+    "immediatelyfast": "client immediate rendering",
+    "obe": "block entity meshing and rendering",
     "ferrite": "Rust entity query and cramming",
     "ferritecore": "memory allocations and model-state reuse",
 }
