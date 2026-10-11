@@ -8,7 +8,7 @@ upstream distribution, but the performance stack as shipped is tested only as a 
 
 | Subsystem | Project / Version | Modrinth artifact | License | Source |
 | --- | --- | --- | --- | --- |
-| Chunk generation, scheduling and chunk I/O | C2ME 0.4.2-alpha.0.87+26.3 | `VSNURh3q:cfKRtp0m` | MIT | https://github.com/RelativityMC/C2ME-fabric |
+| Chunk generation, scheduling and chunk I/O | C2ME 0.4.2-alpha.0.87+26.3 | `VSNURh3q:cfKRtp0m` | MIT (distributed modules only; proprietary OpenCL excluded) | https://github.com/RelativityMC/C2ME-fabric |
 | Block and sky lighting | ScalableLux 0.3.0-alpha.0.6+26.3 | `Ps1zyz6x:g4eqNSKd` | LGPL-3.0-only | https://github.com/RelativityMC/ScalableLux |
 | Entity ticking, collisions and game logic | Lithium 0.26.2 for 26.3 | `gvQqBUqZ:xS0Q8LSi` | LGPL-3.0-only | https://github.com/CaffeineMC/lithium |
 | Immediate rendering (client only) | ImmediatelyFast 1.17.1+26.3 Fabric | `5ZwdcRci:3MP9UR23` | LGPL-3.0-or-later | https://github.com/RaphiMC/ImmediatelyFast |
@@ -27,6 +27,11 @@ archives remain inside those archives.
 
 ## Operational notes
 
+- The C2ME monorepo also has a proprietary All Rights Reserved OpenCL
+  acceleration module. **The downloaded distribution used here does not contain
+  that module** (verified by examining its actual nested JAR manifest), and our
+  bundle-validation script forbids OpenCL module paths. Do not add that module
+  without separate written redistribution permission.
 - Sodium is **not** bundled. Its PolyForm Shield license imposes separate
   conditions, and this project does not assume blanket redistribution rights.
 - C2ME, ScalableLux and Ferrite 26.3 artifacts are **alpha releases**.
