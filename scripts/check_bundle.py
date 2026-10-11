@@ -20,6 +20,7 @@ REQUIRED = {
     "obe": "block entity meshing and rendering",
     "ferrite": "Rust entity query and cramming",
     "ferritecore": "memory allocations and model-state reuse",
+    "modernfix": "startup and resource loading",
 }
 
 def inspect(jar_path: Path) -> set[str]:
