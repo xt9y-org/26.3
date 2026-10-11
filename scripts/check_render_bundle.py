@@ -21,6 +21,14 @@ FILES = (
     "META-INF/licenses/LGPL-3.0-ImmediatelyFast.txt",
     "META-INF/licenses/GPL-3.0-Companion.txt",
     "xt9y263-rendering.mixins.json",
+    "xt9y263-hotpaths.mixins.json",
+    "dev/xt9y/perf/mixin/worldgen/SeaLevelCacheMixin.class",
+    "dev/xt9y/perf/mixin/pathing/PathNavigationRegionMixin.class",
+    "dev/xt9y/perf/mixin/hotpath/NativeHotPathPlugin.class",
+    "META-INF/sources/xt9y-engine-hotpaths/worldgen/SeaLevelCacheMixin.java",
+    "META-INF/sources/xt9y-engine-hotpaths/pathing/PathNavigationRegionMixin.java",
+    "META-INF/sources/xt9y-engine-hotpaths/hotpath/NativeHotPathPlugin.java",
+    "META-INF/licenses/LGPL-3.0-Lithium.txt",
     "fabric.mod.json",
 )
 
@@ -37,6 +45,21 @@ def verify(jar_path: Path) -> None:
         mod = json.loads(archive.read("fabric.mod.json"))
         if "xt9y263-rendering.mixins.json" not in mod["mixins"]:
             raise ValueError("Rendering mixin configuration missing from Fabric manifest")
+
+        if "xt9y263-hotpaths.mixins.json" not in mod["mixins"]:
+            raise ValueError("Worldgen/pathing mixin manifest registration missing")
+        hotpaths = json.loads(archive.read("xt9y263-hotpaths.mixins.json"))
+        if hotpaths.get("mixins") != ["worldgen.SeaLevelCacheMixin", "pathing.PathNavigationRegionMixin"]:
+            raise ValueError("Worldgen/pathing mixins registered incorrectly")
+        if not hotpaths.get("plugin", "").endswith("NativeHotPathPlugin"):
+            raise ValueError("Worldgen/pathing baseline gating missing")
+        for src in (
+            "META-INF/sources/xt9y-engine-hotpaths/worldgen/SeaLevelCacheMixin.java",
+            "META-INF/sources/xt9y-engine-hotpaths/pathing/PathNavigationRegionMixin.java",
+        ):
+            content = archive.read(src).decode("utf-8")
+            if "CaffeineMC" not in content or "LGPL-3.0" not in content:
+                raise ValueError("Hotpath source/attribution missing")
 
         render_config = json.loads(archive.read("xt9y263-rendering.mixins.json"))
         if render_config.get("mixins", []):
