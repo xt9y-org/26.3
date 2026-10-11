@@ -9,7 +9,7 @@ permissions:
   contents: write
 concurrency:
   group: fabric-release-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
