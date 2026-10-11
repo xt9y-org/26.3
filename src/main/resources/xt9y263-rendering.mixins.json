@@ -5,7 +5,8 @@
   "plugin": "dev.xt9y.perf.mixin.rendering.RenderOptimizationPlugin",
   "client": [
     "TextGlyphConsumerMixin",
-    "AppleFullBufferUploadMixin"
+    "AppleFullBufferUploadMixin",
+    "RenderTypeFeatureRendererAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
