@@ -52,6 +52,7 @@ tasks.register('stageNative', Sync) {
 def modVersion = version.toString()
 processResources {
     dependsOn tasks.named('stageNative')
+    from('THIRD_PARTY_NOTICES.md') { into 'META-INF' }
     from(layout.buildDirectory.dir('generated/native'))
     inputs.property 'version', modVersion
     filesMatching('fabric.mod.json') { expand version: modVersion }
