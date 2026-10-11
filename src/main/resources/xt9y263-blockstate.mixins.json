@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "dev.xt9y.perf.engine.blockstate.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "dev.xt9y.perf.engine.blockstate.mixin.BlockstateMixinPlugin",
+  "mixins": [
+    "accessors.StateHolderAccess",
+    "fastmap.FastMapStateHolderMixin",
+    "fastmap.StateDefinitionMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

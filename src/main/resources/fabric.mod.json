@@ -18,7 +18,8 @@
   },
   "mixins": [
     "xt9y263.mixins.json",
-    "xt9y263-ticking.mixins.json"
+    "xt9y263-ticking.mixins.json",
+    "xt9y263-blockstate.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.19.5",
