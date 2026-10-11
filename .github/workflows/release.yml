@@ -62,9 +62,77 @@ jobs:
           path: dist/fabric.jar
           if-no-files-found: error
 
+  verify-tag:
+    name: Verify 1.0 release candidate
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.7.0'
+      - name: Python packaging, compatibility and benchmark tests
+        run: python3 -m unittest discover -s scripts -p 'test_*.py'
+      - name: Build exact release-tag Java and native code
+        shell: bash
+        run: gradle build "-Pversion=${GITHUB_REF_NAME#v}" --no-daemon
+      - name: Verify production JAR includes complete LGPL/GPL license texts and mixins
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from scripts.check_render_bundle import verify
+          jars = [p for p in Path("build/libs").glob("*.jar")
+                  if not any(s in p.name for s in ("-sources", "-dev", "-javadoc"))]
+          if len(jars) != 1:
+              raise RuntimeError(f"Expected one production Fabric JAR: {jars}")
+          verify(jars[0])
+          PY
+      - name: Actual Minecraft block-state and random-tick oracles
+        run: |
+          XT9Y_TEST_BLOCKSTATES=1 bash scripts/smoke_server.sh
+          grep -q 'BlockState oracle passed' run/xt9y263-smoke.log
+          XT9Y_TEST_CHUNK_RANDOM=1 bash scripts/smoke_server.sh
+          grep -q 'Random chunk tick oracle passed: 32768 exact positions' run/xt9y263-smoke.log
+      - name: Actual Minecraft lighting parity
+        run: |
+          XT9Y_TEST_LIGHT_ORACLE=1 XT9Y_PERF_BASELINE=1 XT9Y263_PARITY=1 bash scripts/smoke_server.sh
+          cp run/xt9y263-smoke.log baseline-light.log
+          rm -rf run/world
+          XT9Y_TEST_LIGHT_ORACLE=1 XT9Y263_PARITY=1 bash scripts/smoke_server.sh
+          python3 scripts/check_lighting.py baseline-light.log run/xt9y263-smoke.log
+      - name: Install software OpenGL client environment
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y xvfb libgl1-mesa-dri libgl1 mesa-utils
+      - name: Actual Minecraft client optimized and baseline graphical boots
+        run: |
+          bash scripts/smoke_client.sh
+          XT9Y_PERF_BASELINE=1 bash scripts/smoke_client.sh
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: release-tag-validation-logs
+          path: |
+            baseline-light.log
+            run/xt9y263-smoke.log
+            run/logs/latest.log
+            run/crash-reports/
+          if-no-files-found: ignore
+
   publish:
     name: Publish one universal Fabric JAR
-    needs: build
+    needs: [build, verify-tag]
+    if: >-
+      always() &&
+      needs.build.result == 'success' &&
+      (needs.verify-tag.result == 'success' ||
+       (github.ref_type != 'tag' && needs.verify-tag.result == 'skipped'))
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
