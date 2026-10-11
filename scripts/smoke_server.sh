@@ -41,7 +41,7 @@ for second in $(seq 1 240); do
         tail -n 140 "$log"
         exit 1
       fi
-      sleep 25
+      sleep "${XT9Y_BENCH_SECONDS:-25}"
     fi
     if ! printf 'save-all flush\nstop\n' >&3; then
       echo "Server quit before save/stop" >&2
