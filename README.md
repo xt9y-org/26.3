@@ -15,6 +15,10 @@ A **single universal Fabric JAR** with a lossless-targeting performance stack an
 | Memory | FerriteCore 9.0.0 (26.3-compatible) | Less memory use and allocation pressure |
 | Startup and resource loading | ModernFix-mVUS 5.27.20 (26.3) | Faster startup, resource handling, memory and initialization |
 
+**One mod download:** all eight performance engines are already nested inside our Fabric JAR. You do **not** download those performance mods individually. Fabric Loader and Fabric API are still required, as with normal Fabric installations. These are upstream implementations embedded as separate Fabric modules, not yet code rewritten under one mod ID.
+
+**Direct-source migration:** [ENGINE_PORTING.md](ENGINE_PORTING.md) specifies how each engine will be incorporated into our own codebase without duplicate mixins, missing licenses or quality reductions.
+
 **Source attribution and full legal details:** [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). C2ME's proprietary OpenCL module is **not** bundled and is excluded by an automated package checker.
 
 ### Quality and simulation
