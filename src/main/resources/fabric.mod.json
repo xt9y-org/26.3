@@ -3,19 +3,34 @@
   "id": "xt9y263",
   "version": "${version}",
   "name": "26.3 Performance",
-  "description": "Lightweight on-demand native Rust telemetry for Minecraft 26.3 Fabric.",
-  "authors": ["xt9y"],
+  "description": "Native Rust profiler and in-house lossless Minecraft 26.3 performance optimizations.",
+  "authors": [
+    "xt9y"
+  ],
   "environment": "*",
   "entrypoints": {
-    "main": ["dev.xt9y.perf.PerfMod"],
-    "client": ["dev.xt9y.perf.client.PerfClient"]
+    "main": [
+      "dev.xt9y.perf.PerfMod"
+    ],
+    "client": [
+      "dev.xt9y.perf.client.PerfClient"
+    ]
   },
-  "mixins": ["xt9y263.mixins.json"],
+  "mixins": [
+    "xt9y263.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=0.19.5",
     "minecraft": "~26.3",
     "java": ">=25",
-    "fabric-api": "*",
+    "fabric-api": "*"
+  },
+  "suggests": {
     "fabric-gui-imgui": "*"
+  },
+  "custom": {
+    "ferritecore:disabled_options": [
+      "dataComponentPatch"
+    ]
   }
 }

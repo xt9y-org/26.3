@@ -35,3 +35,9 @@ CI compiles Rust on Windows x64, Linux x64, Apple Silicon and Intel macOS and re
 [Releases](https://github.com/xt9y-org/26.3/releases) · [CI](https://github.com/xt9y-org/26.3/actions)
 
 For high-impact whole-game performance improvements, use verified Minecraft 26.3-compatible rendering, memory, tick and chunk-optimization mods, and profile compatibility before integrating equivalent kernels into this mod.
+
+## Integrated source optimization (lossless)
+
+**Empty data-component map compaction:** when an item's patched component map becomes empty, Minecraft now reuses a shared immutable empty map instead of retaining a per-object mutable map. Its copy-on-write flag ensures later component edits work normally. This optimization is implemented directly in our own `ComponentMapCompactionMixin.java` source, adapted from FerriteCore under MIT. The upstream duplicate is disabled automatically if FerriteCore is separately installed.
+
+No item behavior or quality settings are changed. A real Minecraft 26.3 dedicated-server boot is included in CI to catch invalid mixin hooks. This is one limited memory optimization, not a complete rewrite of the chunk, lighting, renderer, and entity engines.
