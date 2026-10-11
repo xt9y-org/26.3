@@ -15,7 +15,7 @@ public final class TickerMixinPlugin implements IMixinConfigPlugin {
         ferriteInstalled = FabricLoader.getInstance().isModLoaded("ferrite");
     }
     @Override public boolean shouldApplyMixin(String target, String mixin) {
-        return !ferriteInstalled;
+        return !ferriteInstalled && !dev.xt9y.perf.engine.PerformanceMode.baseline();
     }
     @Override public String getRefMapperConfig() { return null; }
     @Override public void acceptTargets(Set<String> mine, Set<String> others) {}

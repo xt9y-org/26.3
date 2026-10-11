@@ -66,9 +66,11 @@ public final class BlockstateOracle {
             }
         }
         if (transitions == 0) throw new AssertionError("Block state oracle did not execute");
-        dev.xt9y.perf.engine.blockstate.FaceArrayPool.verify();
-        PerfMod.LOGGER.info("Blockstate face arrays reused: {}",
-                dev.xt9y.perf.engine.blockstate.FaceArrayPool.reusedCount());
+        if (!dev.xt9y.perf.engine.PerformanceMode.baseline())
+            dev.xt9y.perf.engine.blockstate.FaceArrayPool.verify();
+        PerfMod.LOGGER.info("Blockstate face arrays reused: {}, baseline: {}",
+                dev.xt9y.perf.engine.blockstate.FaceArrayPool.reusedCount(),
+                dev.xt9y.perf.engine.PerformanceMode.baseline());
         PerfMod.LOGGER.info("BlockState oracle passed: {} states, {} exact transitions, {} ms",
                 distinctStates, transitions, (System.nanoTime() - began) / 1_000_000);
     }

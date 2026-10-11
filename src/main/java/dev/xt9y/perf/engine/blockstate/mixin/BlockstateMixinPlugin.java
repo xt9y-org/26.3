@@ -15,7 +15,7 @@ public final class BlockstateMixinPlugin implements IMixinConfigPlugin {
         ferriteCoreInstalled = FabricLoader.getInstance().isModLoaded("ferritecore");
     }
     @Override public boolean shouldApplyMixin(String target, String mixin) {
-        return !ferriteCoreInstalled;
+        return !ferriteCoreInstalled && !dev.xt9y.perf.engine.PerformanceMode.baseline();
     }
     @Override public String getRefMapperConfig() { return null; }
     @Override public void acceptTargets(Set<String> my, Set<String> others) {}
