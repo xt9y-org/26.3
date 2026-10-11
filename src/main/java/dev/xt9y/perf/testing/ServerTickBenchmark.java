@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 /** Opt-in benchmark over actual Minecraft server ticks. Zero cost when disabled. */
 public final class ServerTickBenchmark {
-    private static final int WARMUP = 100;
+    private static final int WARMUP = 60;
     private final long[] samples = new long[2048];
     private int ticks, recorded;
     private long start;
