@@ -105,3 +105,15 @@ mixins. CI tests cached results against vanilla in the real 26.3 server, in
 both optimized and `XT9Y_PERF_BASELINE=1` modes.
 
 This does **not** replace the terrain noise generator or full lighting engine.
+
+## In-game lighting equivalence gate
+
+When `XT9Y_TEST_LIGHT_ORACLE=1` is set before launching the
+dedicated server, a test-only fixture inserts a glowstone light emitter and
+an obsidian occlusion wall at Y=260, then removes the emitter. It waits for
+lighting to settle and hashes 8,125 positions' block and sky light levels
+in each of the lit/dark phases. CI launches the same world seed with
+`XT9Y_PERF_BASELINE=1` and with xt9y optimizations, then requires the
+two fields to match exactly. This provides real lighting-correctness coverage
+for future lighting algorithm changes, but is not itself an optimized
+replacement for Minecraft's lighting engine.
