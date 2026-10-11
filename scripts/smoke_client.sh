@@ -21,10 +21,16 @@ trap cleanup EXIT
 
 export XT9Y_CLIENT_SMOKE=1
 export LIBGL_ALWAYS_SOFTWARE=1
-export MESA_GL_VERSION_OVERRIDE=4.6
 export GALLIUM_DRIVER=llvmpipe
+export SDL_VIDEODRIVER=x11
+# 26.3 uses SDL3 and may prefer Vulkan. Xvfb's GLX implementation can lack
+# a compatible visual; supply Mesa's Lavapipe ICD as a software Vulkan WSI
+# fallback rather than incorrectly treating a driver failure as mod failure.
+if [[ -f /usr/share/vulkan/icd.d/lvp_icd.x86_64.json ]]; then
+  export VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/lvp_icd.x86_64.json
+fi
 
-xvfb-run -a -s "-screen 0 1280x800x24" \
+xvfb-run -a -s "-screen 0 1280x800x24 +extension GLX +render" \
   gradle runClient --no-daemon --console=plain >"$output" 2>&1 &
 pid=$!
 
