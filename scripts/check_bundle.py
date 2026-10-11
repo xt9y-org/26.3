@@ -37,6 +37,17 @@ def inspect(jar_path: Path) -> set[str]:
                 if "fabric.mod.json" in inner.namelist():
                     manifest = json.loads(inner.read("fabric.mod.json"))
                     found.add(manifest["id"])
+                    if manifest["id"] == "c2me":
+                        # C2ME's optional OpenCL module is explicitly all
+                        # rights reserved and must never be redistributed.
+                        forbidden = [name for name in inner.namelist()
+                                     if "opencl" in name.lower()]
+                        forbidden += [entry.get("file", "") for entry in manifest.get("jars", [])
+                                      if "opencl" in entry.get("file", "").lower()]
+                        if forbidden:
+                            raise AssertionError(
+                                f"Do not redistribute proprietary C2ME OpenCL code: {forbidden}"
+                            )
         missing = REQUIRED.keys() - found
         assert not missing, f"Embedded performance modules missing: {sorted(missing)}; found: {sorted(found)}"
         print(f"{jar_path.name}: embedded {len(found)} mods; all required engines present")
