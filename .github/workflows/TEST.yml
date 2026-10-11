@@ -75,7 +75,15 @@ jobs:
           echo "Backing up vanilla test world: $save_dir"
           cp run/xt9y263-smoke.log baseline-smoke.log
           mv "$save_dir" baseline-world
-      - name: Generate identical seed using six optimized engines
+      - name: Repeat seed 73452981 with vanilla for nondeterminism control
+        run: XT9Y263_PARITY=1 bash scripts/smoke_server.sh -Pxt9yDisableEngines=true
+      - name: Preserve vanilla control
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp run/xt9y263-smoke.log control-smoke.log
+          mv run/world baseline-control
+      - name: Generate identical seed using eight optimized engines
         run: XT9Y263_PARITY=1 bash scripts/smoke_server.sh
       - name: Verify lossless block, biome, heightmap and lighting output
         shell: bash
@@ -89,7 +97,7 @@ jobs:
           find baseline-world -maxdepth 5 -type f | head -n 120
           echo "Optimized save files:"
           find "$(dirname "$save_file")" -maxdepth 5 -type f | head -n 120
-          python3 scripts/world_fingerprint.py baseline-world "$(dirname "$save_file")" --minimum 8
+          python3 scripts/world_semantics.py baseline-world "$(dirname "$save_file")" --control baseline-control
           python3 scripts/performance_summary.py baseline-smoke.log run/xt9y263-smoke.log
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -98,7 +106,11 @@ jobs:
           path: |
             run/xt9y263-smoke.log
             baseline-world/dimensions/minecraft/overworld/region/
+            baseline-control/dimensions/minecraft/overworld/region/
             baseline-world/level.dat
+            baseline-control/level.dat
+            baseline-smoke.log
+            control-smoke.log
             run/world/dimensions/minecraft/overworld/region/
             run/world/level.dat
           if-no-files-found: ignore
