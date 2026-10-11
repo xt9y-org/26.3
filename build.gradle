@@ -32,6 +32,8 @@ dependencies {
     include        "maven.modrinth:c2DHmFvV:UhO60CKq"
     implementation "maven.modrinth:uXXizFIs:d5ddUdiB" // FerriteCore: memory footprint
     include        "maven.modrinth:uXXizFIs:d5ddUdiB"
+    implementation "maven.modrinth:TjSm1wrD:iKbywnU7" // ModernFix-mVUS: game init / memory / loading
+    include        "maven.modrinth:TjSm1wrD:iKbywnU7"
     }
 }
 // Compile and embed the native library automatically for the build machine.
