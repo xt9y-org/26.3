@@ -45,6 +45,14 @@ jobs:
           XT9Y_PERF_BASELINE=1 XT9Y_TEST_BLOCKSTATES=1 bash scripts/smoke_server.sh
           grep -q 'BlockState oracle passed' run/xt9y263-smoke.log
           grep -q 'baseline: true' run/xt9y263-smoke.log
+      - name: Verify shape-cache results match the vanilla boolean shape predicate
+        run: |
+          XT9Y_TEST_SHAPE_CACHE=1 bash scripts/smoke_server.sh
+          grep -q 'Shape cache oracle passed' run/xt9y263-smoke.log
+      - name: Verify shape oracle against vanilla with optimization disabled
+        run: |
+          XT9Y_TEST_SHAPE_CACHE=1 XT9Y_PERF_BASELINE=1 bash scripts/smoke_server.sh
+          grep -q 'Shape cache oracle passed' run/xt9y263-smoke.log
       - name: Verify optimized chunk random tick coordinates and RNG against vanilla
         run: |
           XT9Y_TEST_CHUNK_RANDOM=1 bash scripts/smoke_server.sh
