@@ -26,6 +26,8 @@ class RenderBundleTests(unittest.TestCase):
                     })
                 elif filename.endswith("ImmediatelyFast.txt"):
                     value = "GNU LESSER GENERAL PUBLIC LICENSE"
+                elif filename.endswith("GPL-3.0-Companion.txt"):
+                    value = "GNU GENERAL PUBLIC LICENSE"
                 elif filename.endswith(".java"):
                     value = "ImmediatelyFast getVertexBuilder"
                 else:
@@ -40,6 +42,12 @@ class RenderBundleTests(unittest.TestCase):
     def test_missing_corresponding_source_is_failure(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = self.make(Path(tmp), "META-INF/sources/xt9y-rendering/TextGlyphConsumerMixin.java")
+            with self.assertRaisesRegex(ValueError, "packaging incomplete"):
+                verify(path)
+
+    def test_missing_gpl_companion_text_is_failure(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self.make(Path(tmp), "META-INF/licenses/GPL-3.0-Companion.txt")
             with self.assertRaisesRegex(ValueError, "packaging incomplete"):
                 verify(path)
 
