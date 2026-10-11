@@ -30,10 +30,10 @@ def assemble(directory: Path, output: Path, version: str) -> None:
         natives = {name: data for name, data in files.items() if name.startswith("natives/")}
         if set(natives) != {expected} or not natives[expected]:
             raise ValueError(f"Missing/unexpected native for {platform}: {list(natives)}")
-        # Git autocrlf may rewrite JSON resources on Windows. Normalize text
-        # before comparing and embedding; never normalize class or native bytes.
+        # Git autocrlf may rewrite text resources (including redistributed
+        # MIT/LGPL licenses) on Windows. Never normalize class/native bytes.
         code = {
-            name: data.replace(b"\r\n", b"\n") if name.endswith(".json") else data
+            name: data.replace(b"\r\n", b"\n") if name.endswith((".json", ".txt", ".md", ".properties")) else data
             for name, data in files.items() if not name.startswith("natives/")
         }
         if common is None:
