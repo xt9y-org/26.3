@@ -11,6 +11,10 @@ public final class PerfMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        if ("1".equals(System.getenv("XT9Y_TEST_BLOCKSTATES"))) {
+            net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTED
+                    .register(server -> dev.xt9y.perf.testing.BlockstateOracle.verify());
+        }
         // No native loading, file IO, or sampling until the debugger is opened.
         final long[] started = {0};
         ServerTickEvents.START_SERVER_TICK.register(server -> {
