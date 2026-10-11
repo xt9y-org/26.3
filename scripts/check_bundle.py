@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the distributable Fabric JAR actually includes our five engine modules.
+"""Validate the distributable Fabric JAR actually includes our six engine modules.
 
 This checks Fabric's real nested-JAR manifest, not just Gradle dependency
 resolution. It intentionally fails if code is shaded or a dependency is absent.
@@ -18,6 +18,7 @@ REQUIRED = {
     "lithium": "entity ticking and game logic",
     "immediatelyfast": "client rendering",
     "ferrite": "Rust entity query and cramming",
+    "ferritecore": "memory allocations and model-state reuse",
 }
 
 def inspect(jar_path: Path) -> set[str]:
