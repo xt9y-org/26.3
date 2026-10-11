@@ -5,8 +5,8 @@ set -euo pipefail
 # Both worlds are created with the same seed in independent new directories;
 # never remove or overwrite the player's regular 'world' save.
 mkdir -p run
-control="$(mktemp -d -p run xt9y-hotpath-control-XXXXXXXX)"
-optimized="$(mktemp -d -p run xt9y-hotpath-optimized-XXXXXXXX)"
+control="$(mktemp -d "run/xt9y-hotpath-control-XXXXXXXX")"
+optimized="$(mktemp -d "run/xt9y-hotpath-optimized-XXXXXXXX")"
 keep="${XT9Y_KEEP_PARITY_WORLDS:-0}"
 cleanup() {
   if [[ "$keep" != "1" ]]; then
