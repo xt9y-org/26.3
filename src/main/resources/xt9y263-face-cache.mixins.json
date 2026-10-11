@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "dev.xt9y.perf.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "dev.xt9y.perf.mixin.FaceCacheMixinPlugin",
+  "mixins": [
+    "FaceArrayCacheMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

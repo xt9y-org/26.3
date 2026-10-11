@@ -30,3 +30,12 @@ vanilla per-state property arrays (only neighbor lookup is replaced) to
 minimize mapping risk. If FerriteCore is installed separately, our mixin
 plugin skips this feature rather than competing for StateHolder overwrites.
 Exact source branch: https://github.com/malte0811/FerriteCore/tree/26.1
+
+## Source-port step 4: blockstate face-array deduplication
+
+This in-house implementation follows FerriteCore's MIT-licensed
+BlockStateCacheImpl.deduplicateFaceSturdyArray idea, but uses a small
+thread-safe content-key map and limits itself to boolean[] sharing.
+It does not intern or mutate VoxelShape internals.
+Source: https://github.com/malte0811/FerriteCore/tree/26.1
+MIT license is bundled with this mod.
