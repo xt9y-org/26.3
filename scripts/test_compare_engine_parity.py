@@ -4,7 +4,7 @@ from compare_engine_parity import parse, verify
 
 def example(sha: str, path: int = 6144, level: int = 63) -> str:
     return (f"XT9Y_WORLDGEN_SNAPSHOT sampled=5000 sha256={sha}\n"
-            f"XT9Y_PATH_ORACLE passed={path} exact state/fluid lookups\n"
+            f"XT9Y_PATH_ORACLE passed={path} exact state/fluid lookups, sea_boundary=3087 wet_positions=4\n"
             f"XT9Y_WORLDGEN_SEA_LEVEL actual={level} expected={level}\n")
 
 
@@ -34,6 +34,10 @@ class EngineParityTests(unittest.TestCase):
     def test_no_sea_level_oracle_fails(self):
         with self.assertRaisesRegex(ValueError, "Missing"):
             parse("XT9Y_WORLDGEN_SNAPSHOT sampled=5000 sha256=" + "a" * 64)
+
+    def test_missing_aquatic_boundary_data_fails(self):
+        with self.assertRaisesRegex(ValueError, "Missing"):
+            parse(example("a" * 64).replace(", sea_boundary=3087 wet_positions=4", ""))
 
     def test_insufficient_samples_fail(self):
         with self.assertRaisesRegex(ValueError, "Insufficient"):
