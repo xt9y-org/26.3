@@ -21,7 +21,7 @@ class RenderBundleTests(unittest.TestCase):
                 elif filename == "xt9y263-rendering.mixins.json":
                     value = json.dumps({
                         "mixins": [],
-                        "client": ["TextGlyphConsumerMixin"],
+                        "client": ["TextGlyphConsumerMixin", "AppleFullBufferUploadMixin"],
                         "plugin": "example.RenderOptimizationPlugin",
                     })
                 elif filename.endswith("ImmediatelyFast.txt"):
@@ -39,13 +39,13 @@ class RenderBundleTests(unittest.TestCase):
 
     def test_missing_corresponding_source_is_failure(self):
         with tempfile.TemporaryDirectory() as tmp:
-            path = self.make(Path(tmp), FILES[2])
+            path = self.make(Path(tmp), "META-INF/sources/xt9y-rendering/TextGlyphConsumerMixin.java")
             with self.assertRaisesRegex(ValueError, "packaging incomplete"):
                 verify(path)
 
     def test_missing_client_mixin_metadata_is_failure(self):
         with tempfile.TemporaryDirectory() as tmp:
-            path = self.make(Path(tmp), FILES[5])
+            path = self.make(Path(tmp), "xt9y263-rendering.mixins.json")
             with self.assertRaisesRegex(ValueError, "packaging incomplete"):
                 verify(path)
 
