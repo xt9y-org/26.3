@@ -203,20 +203,15 @@ that `PathNavigationRegion` block/fluid lookups match the vanilla world.
 The Python comparator requires a single complete snapshot and rejects
 different hashes or missing output.
 
-To run this test locally (warning: it writes to `run/`):
+To run this test locally on macOS or Linux without touching a regular
+save, use one command:
 ```sh
-XT9Y_TEST_LEVEL_NAME=xt9y-hotpath-parity-world \
-XT9Y_TEST_WORLDGEN_SNAPSHOT=1 XT9Y_TEST_PATH_ORACLE=1 \
-XT9Y263_PARITY=1 bash scripts/smoke_server.sh
-cp run/xt9y263-smoke.log baseline-hotpaths.log
-
-# Use a fresh test world with the same seed; do not delete your normal save.
-rm -rf run/xt9y-hotpath-parity-world
-XT9Y_TEST_LEVEL_NAME=xt9y-hotpath-parity-world \
-XT9Y_TEST_WORLDGEN_SNAPSHOT=1 XT9Y_TEST_PATH_ORACLE=1 \
-XT9Y_NATIVE_HOTPATHS=1 XT9Y263_PARITY=1 bash scripts/smoke_server.sh
-python3 scripts/compare_engine_parity.py baseline-hotpaths.log run/xt9y263-smoke.log
+bash scripts/test_engine_parity.sh
 ```
+The script uses two unique temporary worlds with the same seed, compares
+their hashes and exact path/fluid queries, and saves both logs under `run/`.
+Set `XT9Y_KEEP_PARITY_WORLDS=1` if the generated worlds should remain for
+manual inspection.
 
 A passing oracle covers sampled states, not all possible modded blocks or
 worldgen structures. The `XT9Y_FPS_BENCH=1` and `XT9Y_TPS_BENCH=1`
