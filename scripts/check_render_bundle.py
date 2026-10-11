@@ -25,10 +25,8 @@ FILES = (
     "xt9y263-rendering.mixins.json",
     "xt9y263-hotpaths.mixins.json",
     "dev/xt9y/perf/mixin/worldgen/SeaLevelCacheMixin.class",
-    "dev/xt9y/perf/mixin/pathing/PathNavigationRegionMixin.class",
     "dev/xt9y/perf/mixin/hotpath/NativeHotPathPlugin.class",
     "META-INF/sources/xt9y-engine-hotpaths/worldgen/SeaLevelCacheMixin.java",
-    "META-INF/sources/xt9y-engine-hotpaths/pathing/PathNavigationRegionMixin.java",
     "META-INF/sources/xt9y-engine-hotpaths/hotpath/NativeHotPathPlugin.java",
     "META-INF/licenses/LGPL-3.0-Lithium.txt",
     "fabric.mod.json",
@@ -49,19 +47,28 @@ def verify(jar_path: Path) -> None:
             raise ValueError("Rendering mixin configuration missing from Fabric manifest")
 
         if "xt9y263-hotpaths.mixins.json" not in mod["mixins"]:
-            raise ValueError("Worldgen/pathing mixin manifest registration missing")
+            raise ValueError("Worldgen mixin manifest registration missing")
         hotpaths = json.loads(archive.read("xt9y263-hotpaths.mixins.json"))
-        if hotpaths.get("mixins") != ["worldgen.SeaLevelCacheMixin", "pathing.PathNavigationRegionMixin"]:
-            raise ValueError("Worldgen/pathing mixins registered incorrectly")
+        # No AI pathfinding mixin is permitted: the earlier direct section
+        # lookup port can change navigation semantics for aquatic mobs.
+        if hotpaths.get("mixins") != ["worldgen.SeaLevelCacheMixin"]:
+            raise ValueError("Unsafe worldgen/pathing mixin registration")
         if not hotpaths.get("plugin", "").endswith("NativeHotPathPlugin"):
-            raise ValueError("Worldgen/pathing baseline gating missing")
+            raise ValueError("Worldgen baseline gating missing")
         for src in (
             "META-INF/sources/xt9y-engine-hotpaths/worldgen/SeaLevelCacheMixin.java",
-            "META-INF/sources/xt9y-engine-hotpaths/pathing/PathNavigationRegionMixin.java",
         ):
             content = archive.read(src).decode("utf-8")
             if "CaffeineMC" not in content or "LGPL-3.0" not in content:
                 raise ValueError("Hotpath source/attribution missing")
+
+        forbidden = (
+            "dev/xt9y/perf/mixin/pathing/PathNavigationRegionMixin.class",
+            "META-INF/sources/xt9y-engine-hotpaths/pathing/PathNavigationRegionMixin.java",
+        )
+        for path in forbidden:
+            if path in archive.namelist():
+                raise ValueError(f"Unsafe aquatic AI pathfinding rewrite still bundled: {path}")
 
         render_config = json.loads(archive.read("xt9y263-rendering.mixins.json"))
         if render_config.get("mixins", []):

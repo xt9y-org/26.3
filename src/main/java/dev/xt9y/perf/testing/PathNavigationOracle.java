@@ -42,6 +42,35 @@ public final class PathNavigationOracle {
                 }
             }
         }
-        PerfMod.LOGGER.info("XT9Y_PATH_ORACLE passed={} exact state/fluid lookups", checked);
+        // Prior sparse sampling skipped the y=seaLevel boundary almost entirely.
+        // Exercise the true fluid/air transition at and around the sea surface.
+        // This is a block/fluid consistency oracle, not a swimming-AI simulation.
+        int seaLevel = world.getSeaLevel();
+        int wetPositions = 0;
+        int boundaryChecked = 0;
+        for (int x = -80; x <= 80; x += 8) {
+            for (int z = -80; z <= 80; z += 8) {
+                for (int dy = -3; dy <= 3; ++dy) {
+                    int y = seaLevel + dy;
+                    if (y < minY || y > maxY) continue;
+                    pos.set(x, y, z);
+                    BlockState expected = world.getBlockState(pos);
+                    BlockState actual = region.getBlockState(pos);
+                    FluidState expectedFluid = expected.getFluidState();
+                    if (actual != expected || region.getFluidState(pos) != expectedFluid) {
+                        throw new AssertionError("Sea-surface navigation block/fluid mismatch at "
+                                + pos + " block=" + actual + " expected=" + expected);
+                    }
+                    if (!expectedFluid.isEmpty()) ++wetPositions;
+                    ++boundaryChecked;
+                }
+            }
+        }
+        if (boundaryChecked < 1000) {
+            throw new AssertionError("Insufficient sea-surface navigation samples");
+        }
+        PerfMod.LOGGER.info(
+                "XT9Y_PATH_ORACLE passed={} exact state/fluid lookups, sea_boundary={} wet_positions={}",
+                checked, boundaryChecked, wetPositions);
     }
 }
