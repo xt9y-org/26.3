@@ -29,6 +29,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public abstract class TextGlyphConsumerMixin {
     @Unique private RenderType xt9y$lastRenderType;
     @Unique private VertexConsumer xt9y$lastVertexConsumer;
+    @Unique private static final boolean xt9y$smokeEnabled =
+            "1".equals(System.getenv("XT9Y_CLIENT_SMOKE"));
+    @Unique private static boolean xt9y$smokeGlyphSeen;
 
     @Redirect(
         method = "acceptRenderable",
@@ -39,6 +42,10 @@ public abstract class TextGlyphConsumerMixin {
     )
     private VertexConsumer xt9y$cacheGlyphConsumer(
             TextFeatureRenderer renderer, RenderType renderType) {
+        if (xt9y$smokeEnabled && !xt9y$smokeGlyphSeen) {
+            xt9y$smokeGlyphSeen = true;
+            dev.xt9y.perf.PerfMod.LOGGER.info("XT9Y_CLIENT_SMOKE: glyph optimization executed");
+        }
         if (xt9y$lastRenderType != renderType) {
             xt9y$lastRenderType = renderType;
             xt9y$lastVertexConsumer = renderer.getVertexBuilder(renderType);
