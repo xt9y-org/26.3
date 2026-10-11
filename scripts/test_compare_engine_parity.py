@@ -39,6 +39,10 @@ class EngineParityTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Missing"):
             parse(example("a" * 64).replace(", sea_boundary=3087 wet_positions=4", ""))
 
+    def test_no_real_water_cells_rejected(self):
+        with self.assertRaisesRegex(ValueError, "sea-surface navigation boundary"):
+            parse(example("a" * 64).replace("wet_positions=4", "wet_positions=0"))
+
     def test_insufficient_samples_fail(self):
         with self.assertRaisesRegex(ValueError, "Insufficient"):
             parse(example("a" * 64, 100))
