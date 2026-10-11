@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "dev.xt9y.perf.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "dev.xt9y.perf.mixin.TickerMixinPlugin",
+  "mixins": [
+    "AbstractFurnaceBlockEntityAccessor",
+    "WorldChunkInvoker",
+    "WorldChunkBlockEntityTickerGateMixin",
+    "SignEditorChangeMixin",
+    "FurnaceStackChangeMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
