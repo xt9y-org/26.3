@@ -73,6 +73,7 @@ jobs:
           test -n "$save_file"
           save_dir="$(dirname "$save_file")"
           echo "Backing up vanilla test world: $save_dir"
+          cp run/xt9y263-smoke.log baseline-smoke.log
           mv "$save_dir" baseline-world
       - name: Generate identical seed using six optimized engines
         run: XT9Y263_PARITY=1 bash scripts/smoke_server.sh
@@ -89,6 +90,7 @@ jobs:
           echo "Optimized save files:"
           find "$(dirname "$save_file")" -maxdepth 5 -type f | head -n 120
           python3 scripts/world_fingerprint.py baseline-world "$(dirname "$save_file")" --minimum 8
+          python3 scripts/performance_summary.py baseline-smoke.log run/xt9y263-smoke.log
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
