@@ -20,7 +20,7 @@ class RenderBundleTests(unittest.TestCase):
                     })
                 elif filename == "xt9y263-hotpaths.mixins.json":
                     value = json.dumps({
-                        "mixins": ["worldgen.SeaLevelCacheMixin", "pathing.PathNavigationRegionMixin"],
+                        "mixins": ["worldgen.SeaLevelCacheMixin"],
                         "plugin": "example.NativeHotPathPlugin",
                     })
                 elif filename == "xt9y263-rendering.mixins.json":
