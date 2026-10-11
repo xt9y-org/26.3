@@ -4,6 +4,12 @@ on:
     branches: [main]
   pull_request:
 
+# One up-to-date validation run per pull request; old commits must not
+# exhaust runners or publish stale "green" results.
+concurrency:
+  group: test-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   rust:
     runs-on: ubuntu-latest
