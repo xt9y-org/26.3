@@ -43,6 +43,27 @@ class UniversalFabricTests(unittest.TestCase):
                 jar.writestr(f"natives/{platform}/{filename}", platform.encode())
         assemble(self.root, self.root / "dist", "dev-2")
 
+    def test_normalizes_windows_license_crlf(self):
+        path = self.root / "mod-windows-x86_64" / "fabric.jar"
+        with ZipFile(path, "w") as jar:
+            jar.writestr("fabric.mod.json", '{"id":"xt9y263"}')
+            jar.writestr("dev/xt9y/perf/NativeBridge.class", b"code")
+            jar.writestr("META-INF/licenses/MIT-FerriteCore.txt", b"line one\r\nline two\r\n")
+            jar.writestr("natives/windows-x86_64/xt9y263.dll", b"win")
+        for platform, filename in PLATFORMS.items():
+            if platform == "windows-x86_64":
+                continue
+            location = self.root / f"mod-{platform}" / "fabric.jar"
+            with ZipFile(location, "w") as jar:
+                jar.writestr("fabric.mod.json", '{"id":"xt9y263"}')
+                jar.writestr("dev/xt9y/perf/NativeBridge.class", b"code")
+                jar.writestr("META-INF/licenses/MIT-FerriteCore.txt", b"line one\nline two\n")
+                jar.writestr(f"natives/{platform}/{filename}", platform.encode())
+        assemble(self.root, self.root / "dist", "dev-3")
+        with ZipFile(self.root / "dist/26.3-dev-3-fabric.jar") as jar:
+            self.assertEqual(jar.read("META-INF/licenses/MIT-FerriteCore.txt"),
+                             b"line one\nline two\n")
+
     def test_rejects_code_mismatch(self):
         path = self.root / "mod-windows-x86_64/fabric.jar"
         with ZipFile(path, "w") as jar:
