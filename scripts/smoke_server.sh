@@ -18,7 +18,7 @@ fifo="$PWD/run/.xt9y263-smoke-in"
 log="$PWD/run/xt9y263-smoke.log"
 rm -f "$fifo"
 mkfifo "$fifo"
-(gradle runServer --no-daemon --console=plain < "$fifo" > "$log" 2>&1) &
+(gradle runServer --no-daemon --console=plain "$@" < "$fifo" > "$log" 2>&1) &
 launcher=$!
 
 cleanup() {
