@@ -26,6 +26,8 @@ dependencies {
     include        "maven.modrinth:gvQqBUqZ:xS0Q8LSi"
     implementation    "maven.modrinth:5ZwdcRci:3MP9UR23" // ImmediatelyFast: client rendering
     include        "maven.modrinth:5ZwdcRci:3MP9UR23"
+    implementation "maven.modrinth:AtOSAunf:nmIzJcIn" // OBE: block entity meshing/rendering
+    include        "maven.modrinth:AtOSAunf:nmIzJcIn"
     implementation    "maven.modrinth:c2DHmFvV:UhO60CKq" // Ferrite: JNI entity/collision hot paths
     include        "maven.modrinth:c2DHmFvV:UhO60CKq"
     implementation "maven.modrinth:uXXizFIs:d5ddUdiB" // FerriteCore: memory footprint
