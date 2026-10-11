@@ -23,7 +23,11 @@ public final class WorldgenSnapshot {
             int count = 0;
             for (int x = -96; x <= 96; x += 8) {
                 for (int z = -96; z <= 96; z += 8) {
-                    for (int y = level.getMinY(); y <= level.getMaxY(); y += 16) {
+                    // Subterranean density/cave states are stable after
+                    // initial world generation. Surface foliage, snow and
+                    // fluid updates can depend on wall-clock ticks even with
+                    // the same seed, so do not include them in this oracle.
+                    for (int y = level.getMinY(); y <= Math.min(48, level.getMaxY()); y += 16) {
                         pos.set(x, y, z);
                         byte[] state = level.getBlockState(pos).toString()
                                 .getBytes(StandardCharsets.UTF_8);
