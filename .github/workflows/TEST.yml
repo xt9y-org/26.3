@@ -64,13 +64,27 @@ jobs:
       - name: Generate seed 73452981 using baseline Fabric + vanilla engines
         run: bash scripts/smoke_server.sh -Pxt9yDisableEngines=true
       - name: Preserve baseline Anvil world
+        shell: bash
         run: |
-          test -d run/world/region
-          mv run run-baseline
+          set -euo pipefail
+          echo "Discovering Minecraft world directories:"
+          find . -maxdepth 8 -name level.dat -type f -print
+          save_file="$(find . -maxdepth 8 -name level.dat -type f | head -n 1)"
+          test -n "$save_file"
+          save_dir="$(dirname "$save_file")"
+          echo "Backing up vanilla test world: $save_dir"
+          mv "$save_dir" baseline-world
       - name: Generate identical seed using six optimized engines
         run: bash scripts/smoke_server.sh
       - name: Verify lossless block, biome, heightmap and lighting output
-        run: python3 scripts/world_fingerprint.py run-baseline/world run/world --minimum 8
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Generated worlds:"
+          find . -maxdepth 8 -name level.dat -type f -print
+          save_file="$(find . -maxdepth 8 -name level.dat -type f ! -path './baseline-world/*' | head -n 1)"
+          test -n "$save_file"
+          python3 scripts/world_fingerprint.py baseline-world "$(dirname "$save_file")" --minimum 8
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
