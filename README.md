@@ -159,3 +159,21 @@ vanilla behavior. Adapted under LGPL from the 26.3 ImmediatelyFast source.
 This is a targeted OpenGL optimization, **not** a Metal backend and not a
 complete renderer rewrite. It remains in the development PR pending
 graphical-client startup verification and frame-time measurements.
+
+## Opt-in actual Minecraft server MSPT benchmark
+
+The server hook `XT9Y_TPS_BENCH=1` records real tick durations into
+a bounded array after a 60-tick warmup, then logs mean/P95/P99 MSPT and
+heap use at shutdown. The benchmark hook does not register in normal gameplay.
+
+A/B testing starts a real dedicated 26.3 server twice with seed 73452981
+and the same 169 forced chunks. The first run uses
+`XT9Y_PERF_BASELINE=1`; the second enables native optimizations.
+`scripts/compare_tick_bench.py` rejects missing or insufficient samples.
+One pair of server runs is **not** evidence of a sustained or statistically
+significant speedup, and says nothing about FPS.
+
+Graphical smoke in CI requires a real client tick, completed rendered frame
+and glyph-buffer optimization invocation. It separately checks baseline
+mode without the glyph mixin. This is a startup/hook correctness check, **not**
+a visual pixel-parity test or real-GPU benchmark.
