@@ -111,7 +111,10 @@ jobs:
             baseline-world/dimensions/minecraft/overworld/region/
             baseline-control/dimensions/minecraft/overworld/region/
             baseline-world/level.dat
+            baseline-world/data/minecraft/world_gen_settings.dat
             baseline-control/level.dat
+            baseline-control/data/minecraft/world_gen_settings.dat
+            run/world/data/minecraft/world_gen_settings.dat
             baseline-smoke.log
             control-smoke.log
             run/world/dimensions/minecraft/overworld/region/
