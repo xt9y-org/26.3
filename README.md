@@ -199,10 +199,12 @@ On a testing machine, launch Minecraft with
 `XT9Y_NATIVE_HOTPATHS=1` and verify pathfinding mobs in an existing
 **backup** of a world first. For a reproducible fresh-world server parity
 test, CI runs two Minecraft 26.3 servers with identical seed
-`73452981` and 169 force-loaded chunks, samples world blocks, then checks
-that `PathNavigationRegion` block/fluid lookups match the vanilla world.
-The Python comparator requires a single complete snapshot and rejects
-different hashes or missing output.
+`73452981` and 169 force-loaded chunks. It checks exact generator sea-level
+settings and verifies `PathNavigationRegion` block/fluid lookups against
+real world block states. Sampled block-state hashes are also recorded.
+Different fresh-world hashes are reported **INCONCLUSIVE**, not described
+as equivalent; `XT9Y_REQUIRE_WORLD_HASH=1` enables strict rejection.
+The Python comparator always fails for missing or incorrect engine oracle data.
 
 To run this test locally on macOS or Linux without touching a regular
 save, use one command:
@@ -210,7 +212,8 @@ save, use one command:
 bash scripts/test_engine_parity.sh
 ```
 The script uses two unique temporary worlds with the same seed, compares
-their hashes and exact path/fluid queries, and saves both logs under `run/`.
+sea-level settings and exact path/fluid queries, reports sampled hash equality
+or inconclusiveness, and saves both logs under `run/`.
 Set `XT9Y_KEEP_PARITY_WORLDS=1` if the generated worlds should remain for
 manual inspection.
 
