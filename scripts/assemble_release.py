@@ -33,7 +33,7 @@ def assemble(directory: Path, output: Path, version: str) -> None:
         # Git autocrlf may rewrite text resources (including redistributed
         # MIT/LGPL licenses) on Windows. Never normalize class/native bytes.
         code = {
-            name: data.replace(b"\r\n", b"\n") if name.endswith((".json", ".txt", ".md", ".properties")) else data
+            name: data.replace(b"\r\n", b"\n") if name.endswith((".json", ".txt", ".md", ".properties", ".java")) else data
             for name, data in files.items() if not name.startswith("natives/")
         }
         if common is None:

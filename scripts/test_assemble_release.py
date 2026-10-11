@@ -64,6 +64,20 @@ class UniversalFabricTests(unittest.TestCase):
             self.assertEqual(jar.read("META-INF/licenses/MIT-FerriteCore.txt"),
                              b"line one\nline two\n")
 
+    def test_normalizes_embedded_lgpl_source_crlf(self):
+        source = "META-INF/sources/xt9y-chunk-random/ChunkRandomSource.java"
+        for platform, filename in PLATFORMS.items():
+            jar_path = self.root / f"mod-{platform}" / "fabric.jar"
+            content = b"class Source {\r\n int x;\r\n}\r\n" if platform.startswith("windows") else b"class Source {\n int x;\n}\n"
+            with ZipFile(jar_path, "w") as jar:
+                jar.writestr("fabric.mod.json", '{"id":"xt9y263"}')
+                jar.writestr("dev/xt9y/perf/NativeBridge.class", b"code")
+                jar.writestr(source, content)
+                jar.writestr(f"natives/{platform}/{filename}", platform.encode())
+        assemble(self.root, self.root / "dist", "dev-src")
+        with ZipFile(self.root / "dist/26.3-dev-src-fabric.jar") as jar:
+            self.assertEqual(jar.read(source), b"class Source {\n int x;\n}\n")
+
     def test_rejects_code_mismatch(self):
         path = self.root / "mod-windows-x86_64/fabric.jar"
         with ZipFile(path, "w") as jar:
