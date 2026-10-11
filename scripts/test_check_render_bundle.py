@@ -16,7 +16,12 @@ class RenderBundleTests(unittest.TestCase):
                     continue
                 if filename == "fabric.mod.json":
                     value = json.dumps({
-                        "mixins": ["xt9y263-rendering.mixins.json"]
+                        "mixins": ["xt9y263-rendering.mixins.json", "xt9y263-hotpaths.mixins.json"]
+                    })
+                elif filename == "xt9y263-hotpaths.mixins.json":
+                    value = json.dumps({
+                        "mixins": ["worldgen.SeaLevelCacheMixin", "pathing.PathNavigationRegionMixin"],
+                        "plugin": "example.NativeHotPathPlugin",
                     })
                 elif filename == "xt9y263-rendering.mixins.json":
                     value = json.dumps({
@@ -28,6 +33,8 @@ class RenderBundleTests(unittest.TestCase):
                     value = "GNU LESSER GENERAL PUBLIC LICENSE"
                 elif filename.endswith("GPL-3.0-Companion.txt"):
                     value = "GNU GENERAL PUBLIC LICENSE"
+                elif "xt9y-engine-hotpaths" in filename and filename.endswith(".java"):
+                    value = "CaffeineMC LGPL-3.0 source"
                 elif filename.endswith(".java"):
                     value = "ImmediatelyFast getVertexBuilder"
                 else:
@@ -48,6 +55,18 @@ class RenderBundleTests(unittest.TestCase):
     def test_missing_gpl_companion_text_is_failure(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = self.make(Path(tmp), "META-INF/licenses/GPL-3.0-Companion.txt")
+            with self.assertRaisesRegex(ValueError, "packaging incomplete"):
+                verify(path)
+
+    def test_missing_worldgen_source_is_failure(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self.make(Path(tmp), "META-INF/sources/xt9y-engine-hotpaths/worldgen/SeaLevelCacheMixin.java")
+            with self.assertRaisesRegex(ValueError, "packaging incomplete"):
+                verify(path)
+
+    def test_missing_pathing_manifest_is_failure(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self.make(Path(tmp), "xt9y263-hotpaths.mixins.json")
             with self.assertRaisesRegex(ValueError, "packaging incomplete"):
                 verify(path)
 
