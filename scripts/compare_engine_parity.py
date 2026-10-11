@@ -12,6 +12,7 @@ import sys
 WORLD = re.compile(r"XT9Y_WORLDGEN_SNAPSHOT sampled=(\d+) sha256=([a-f0-9]{64})")
 PATH = re.compile(r"XT9Y_PATH_ORACLE passed=(\d+) exact state/fluid lookups")
 SEA = re.compile(r"XT9Y_WORLDGEN_SEA_LEVEL actual=(-?\d+) expected=(-?\d+)")
+WATER_BOUNDARY = re.compile(r"sea_boundary=(\d+) wet_positions=(\d+)")
 
 
 def parse(log: str) -> tuple[int, str, int, int]:
