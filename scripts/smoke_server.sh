@@ -7,6 +7,7 @@ printf 'eula=true\n' > run/eula.txt
 cat > run/server.properties <<'PROPERTIES'
 level-seed=73452981
 level-type=minecraft:normal
+level-name=${XT9Y_TEST_LEVEL_NAME:-world}
 view-distance=5
 simulation-distance=4
 max-tick-time=-1
