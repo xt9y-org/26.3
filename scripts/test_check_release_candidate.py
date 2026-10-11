@@ -56,6 +56,14 @@ class StableReleaseChecks(unittest.TestCase):
             verify(self.build(), "../1.0.0")
 
     @patch("check_release_candidate.verify_mixins")
+    def test_embedded_upstream_engine_rejected(self, _):
+        path = self.build()
+        with ZipFile(path, "a") as jar:
+            jar.writestr("META-INF/jars/c2me-26.3.jar", b"not allowed")
+        with self.assertRaisesRegex(ValueError, "Rejected bundled performance engine"):
+            verify(path, "1.0.0")
+
+    @patch("check_release_candidate.verify_mixins")
     def test_duplicate_entry_rejected(self, _):
         from warnings import catch_warnings, simplefilter
         path = self.build()
