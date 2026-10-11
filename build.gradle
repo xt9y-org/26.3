@@ -16,15 +16,15 @@ dependencies {
     // Lossless engine optimizations. Pin specific 26.3 Fabric releases.
     // Keep each upstream mod as its own nested JAR with its own metadata,
     // mixins, license and independent update path; never merge class files.
-    modImplementation "maven.modrinth:VSNURh3q:cfKRtp0m" // C2ME: chunk generation/scheduling
+    implementation    "maven.modrinth:VSNURh3q:cfKRtp0m" // C2ME: chunk generation/scheduling
     include        "maven.modrinth:VSNURh3q:cfKRtp0m"
-    modImplementation "maven.modrinth:Ps1zyz6x:g4eqNSKd" // ScalableLux: skylight/blocklight
+    implementation    "maven.modrinth:Ps1zyz6x:g4eqNSKd" // ScalableLux: skylight/blocklight
     include        "maven.modrinth:Ps1zyz6x:g4eqNSKd"
-    modImplementation "maven.modrinth:gvQqBUqZ:xS0Q8LSi" // Lithium: entity/game logic
+    implementation    "maven.modrinth:gvQqBUqZ:xS0Q8LSi" // Lithium: entity/game logic
     include        "maven.modrinth:gvQqBUqZ:xS0Q8LSi"
-    modImplementation "maven.modrinth:5ZwdcRci:3MP9UR23" // ImmediatelyFast: client rendering
+    implementation    "maven.modrinth:5ZwdcRci:3MP9UR23" // ImmediatelyFast: client rendering
     include        "maven.modrinth:5ZwdcRci:3MP9UR23"
-    modImplementation "maven.modrinth:c2DHmFvV:UhO60CKq" // Ferrite: JNI entity/collision hot paths
+    implementation    "maven.modrinth:c2DHmFvV:UhO60CKq" // Ferrite: JNI entity/collision hot paths
     include        "maven.modrinth:c2DHmFvV:UhO60CKq"
 }
 // Compile and embed the native library automatically for the build machine.
