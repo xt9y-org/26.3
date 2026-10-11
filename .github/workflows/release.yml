@@ -80,6 +80,7 @@ jobs:
           else VERSION="dev-$GITHUB_RUN_NUMBER"; fi
           python3 scripts/assemble_release.py --input-root packages --output dist --version "$VERSION"
           test "$(find dist -name '*.jar' | wc -l)" -eq 1
+          python3 scripts/check_bundle.py dist/*.jar
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('dev-{0}', github.run_number) }}
