@@ -21,6 +21,9 @@ public final class GameRendererMixin {
     @Shadow @Final private Minecraft minecraft;
     @Unique private long xt9y263$previousFrameNs;
     @Unique private long xt9y263$renderStartNs;
+    @Unique private static final boolean xt9y263$smokeEnabled =
+            "1".equals(System.getenv("XT9Y_CLIENT_SMOKE"));
+    @Unique private boolean xt9y263$smokeRendered;
 
     @Inject(method = "render", at = @At("HEAD"))
     private void xt9y263$beforeRender(CallbackInfo ci) {
@@ -40,6 +43,10 @@ public final class GameRendererMixin {
 
     @Inject(method = "render", at = @At("RETURN"))
     private void xt9y263$afterRender(CallbackInfo ci) {
+        if (xt9y263$smokeEnabled && !xt9y263$smokeRendered) {
+            xt9y263$smokeRendered = true;
+            dev.xt9y.perf.PerfMod.LOGGER.info("XT9Y_CLIENT_SMOKE: rendered a complete client frame");
+        }
         if (PerformanceState.active()) {
             NativeBridge.record(1, System.nanoTime() - xt9y263$renderStartNs);
         }

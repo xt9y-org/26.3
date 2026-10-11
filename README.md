@@ -135,3 +135,98 @@ measuring GPU throughput. One session is not statistical proof of a
 performance gain. A GPU graphical client pixel-equivalence test is
 still needed before the experimental framebuffer-binding patch is
 enabled by default.
+
+### In-house text-renderer hot-path optimization
+
+Text glyph rendering uses a per-GlyphRenderer identity cache to avoid
+redundant `getVertexBuilder` calls for adjacent glyphs sharing a render
+type. Ported as editable source from LGPL-3.0-or-later ImmediatelyFast.
+No glyph appearance or quality settings are changed; baseline mode
+(`XT9Y_PERF_BASELINE=1`) disables the redirect. If ImmediatelyFast
+is separately installed its own identical mixin takes precedence.
+
+This targets **text/immediate rendering**, not the entire terrain
+renderer. A dedicated graphical-client smoke and A/B frame-time test
+are still required to claim measured FPS gains.
+
+### Apple GPU upload path
+
+On macOS, a complete GPU-buffer replacement (offset 0, full buffer size)
+uses `bufferData` rather than `bufferSubData`, which can avoid a slow
+Apple OpenGL driver path. Partial uploads and non-Apple platforms retain
+vanilla behavior. Adapted under LGPL from the 26.3 ImmediatelyFast source.
+
+This is a targeted OpenGL optimization, **not** a Metal backend and not a
+complete renderer rewrite. It remains in the development PR pending
+graphical-client startup verification and frame-time measurements.
+
+## Opt-in actual Minecraft server MSPT benchmark
+
+The server hook `XT9Y_TPS_BENCH=1` records real tick durations into
+a bounded array after a 60-tick warmup, then logs mean/P95/P99 MSPT and
+heap use at shutdown. The benchmark hook does not register in normal gameplay.
+
+A/B testing starts a real dedicated 26.3 server twice with seed 73452981
+and the same 169 forced chunks. The first run uses
+`XT9Y_PERF_BASELINE=1`; the second enables native optimizations.
+`scripts/compare_tick_bench.py` rejects missing or insufficient samples.
+One pair of server runs is **not** evidence of a sustained or statistically
+significant speedup, and says nothing about FPS.
+
+Graphical smoke in CI requires a real client tick and completed rendered
+frame, and separately checks baseline mode. The title screen does not
+necessarily invoke world-text glyph rendering; in-world glyph testing requires
+a separate fixture (`XT9Y_REQUIRE_GLYPH_SMOKE=1`). This is a startup/hook
+correctness check, **not** a visual pixel-parity test or real-GPU benchmark.
+
+
+## Experimental worldgen and pathfinding hot paths
+
+`XT9Y_NATIVE_HOTPATHS=1` enables two direct-source, LGPL-compatible
+Minecraft hot paths (no extra Lithium JAR):
+- **Chunk generator:** cache the immutable sea-level setting after lazy registry
+  binding rather than resolve its holder for every generator call.
+- **AI pathfinding:** flatten `PathNavigationRegion` chunk arrays and read the
+  exact vanilla block/fluid state from loaded chunk sections.
+
+These are **not** a multithreaded chunk generator, full AI rewrite, complete
+light engine, or a terrain mesh renderer. Source is shipped in the JAR and
+the optimizations are disabled by default until a real Minecraft build,
+worldgen/path oracle and performance A/B testing pass. Baseline mode
+`XT9Y_PERF_BASELINE=1` and separately installed Lithium disable both mixins.
+
+On a testing machine, launch Minecraft with
+`XT9Y_NATIVE_HOTPATHS=1` and verify pathfinding mobs in an existing
+**backup** of a world first. For a reproducible fresh-world server parity
+test, CI runs two Minecraft 26.3 servers with identical seed
+`73452981` and 169 force-loaded chunks. It checks exact generator sea-level
+settings and verifies `PathNavigationRegion` block/fluid lookups against
+real world block states. Sampled block-state hashes are also recorded.
+Different fresh-world hashes are reported **INCONCLUSIVE**, not described
+as equivalent; `XT9Y_REQUIRE_WORLD_HASH=1` enables strict rejection.
+The Python comparator always fails for missing or incorrect engine oracle data.
+
+To run this test locally on macOS or Linux without touching a regular
+save, use one command:
+```sh
+bash scripts/test_engine_parity.sh
+```
+The script uses two unique temporary worlds with the same seed, compares
+sea-level settings and exact path/fluid queries, reports sampled hash equality
+or inconclusiveness, and saves both logs under `run/`.
+Set `XT9Y_KEEP_PARITY_WORLDS=1` if the generated worlds should remain for
+manual inspection.
+
+A passing oracle covers sampled states, not all possible modded blocks or
+worldgen structures. The `XT9Y_FPS_BENCH=1` and `XT9Y_TPS_BENCH=1`
+in-game benchmarks remain necessary for performance claims. In-world glyph
+coverage is separately opt-in via `XT9Y_REQUIRE_GLYPH_SMOKE=1`, because a
+fresh graphical client at its title screen never necessarily renders world text.
+
+## Major stable v1.0.0 candidate
+
+For the complete release checklist, actual local test command, exact versioning,
+manual publish workflow and remaining unreplaced engine systems, see
+[`RELEASE_1.0.0.md`](RELEASE_1.0.0.md). The major version is **not**
+published from a PR: it must pass tests, merge into main, then be launched
+manually in GitHub Actions with `version=1.0.0` and `confirm_publish=RELEASE`.

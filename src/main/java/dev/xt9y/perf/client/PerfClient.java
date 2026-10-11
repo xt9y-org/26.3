@@ -26,7 +26,13 @@ public final class PerfClient implements ClientModInitializer {
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
             start[0] = PerformanceState.active() ? System.nanoTime() : 0;
         });
+        final boolean clientSmoke = "1".equals(System.getenv("XT9Y_CLIENT_SMOKE"));
+        final boolean[] firstTick = {true};
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (clientSmoke && firstTick[0]) {
+                firstTick[0] = false;
+                dev.xt9y.perf.PerfMod.LOGGER.info("XT9Y_CLIENT_SMOKE: client ticks running");
+            }
             long begin = start[0];
             if (PerformanceState.active() && begin != 0) {
                 NativeBridge.record(2, System.nanoTime() - begin);

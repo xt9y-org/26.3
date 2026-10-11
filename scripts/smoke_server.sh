@@ -3,10 +3,18 @@ set -euo pipefail
 
 # Dedicated-server smoke only. This is not yet a performance or parity test.
 mkdir -p run
+# All plain smoke invocations use a fresh private fixture. Never silently
+# open or mutate a player's run/world save.
+xt9y_generated_world=""
+if [[ -z "${XT9Y_TEST_LEVEL_NAME:-}" ]]; then
+  xt9y_generated_world="$(mktemp -d "run/xt9y-smoke-XXXXXXXX")"
+  XT9Y_TEST_LEVEL_NAME="$(basename "$xt9y_generated_world")"
+fi
 printf 'eula=true\n' > run/eula.txt
-cat > run/server.properties <<'PROPERTIES'
+cat > run/server.properties <<PROPERTIES
 level-seed=73452981
 level-type=minecraft:normal
+level-name=${XT9Y_TEST_LEVEL_NAME:-world}
 view-distance=5
 simulation-distance=4
 max-tick-time=-1
@@ -26,6 +34,9 @@ cleanup() {
   kill "$launcher" 2>/dev/null || true
   wait "$launcher" 2>/dev/null || true
   rm -f "$fifo"
+  if [[ -n "$xt9y_generated_world" && "${XT9Y_KEEP_SMOKE_WORLDS:-0}" != "1" ]]; then
+    rm -rf -- "$xt9y_generated_world"
+  fi
 }
 trap cleanup EXIT
 
@@ -34,6 +45,11 @@ for second in $(seq 1 240); do
   if grep -Eq 'Done \([^)]+\)!|Done \(' "$log"; then
     echo "Server startup succeeded after $second seconds."
     if [[ "${XT9Y263_PARITY:-0}" == "1" ]]; then
+      # Prevent random block growth/decay from changing seeded-world
+      # comparison runs solely because their execution times differ.
+      if [[ "${XT9Y_TEST_WORLDGEN_SNAPSHOT:-0}" == "1" ]]; then
+        printf 'gamerule randomTickSpeed 0\n' >&3
+      fi
       # Spawn chunks alone are not necessarily persisted in 26.3.
       # Force 169 chunks from -6..+6 in both axes, then wait for generation.
       if ! printf 'forceload add -96 -96 96 96\n' >&3; then
@@ -41,7 +57,7 @@ for second in $(seq 1 240); do
         tail -n 140 "$log"
         exit 1
       fi
-      sleep 25
+      sleep "${XT9Y_BENCH_SECONDS:-25}"
     fi
     if ! printf 'save-all flush\nstop\n' >&3; then
       echo "Server quit before save/stop" >&2

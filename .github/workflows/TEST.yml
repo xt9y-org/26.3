@@ -4,6 +4,12 @@ on:
     branches: [main]
   pull_request:
 
+# One up-to-date validation run per pull request; old commits must not
+# exhaust runners or publish stale "green" results.
+concurrency:
+  group: test-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   rust:
     runs-on: ubuntu-latest
@@ -35,7 +41,18 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.7.0'
-      - run: gradle build --no-daemon
+      - name: Build the major 1.0.0 release candidate
+        run: gradle build -Pversion=1.0.0 --no-daemon
+      - name: Verify production package version, native and legal contents
+        run: python3 scripts/check_release_candidate.py --build-dir build/libs --version 1.0.0
+      - name: Verify actual rendered JAR includes GPL notices and client mixin
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from scripts.check_render_bundle import verify
+          from scripts.check_release_candidate import find_jar
+          verify(find_jar(Path("build/libs")))
+          PY
       - name: Boot Minecraft and verify all vanilla blockstate transitions
         run: |
           XT9Y_TEST_BLOCKSTATES=1 bash scripts/smoke_server.sh
@@ -72,20 +89,118 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.7.0'
-      - name: Record vanilla light propagation, same world seed
-        run: |
-          XT9Y_TEST_LIGHT_ORACLE=1 XT9Y_PERF_BASELINE=1 XT9Y263_PARITY=1 bash scripts/smoke_server.sh
-          cp run/xt9y263-smoke.log baseline-light.log
-          rm -rf run/world
-      - name: Record optimized light propagation
-        run: XT9Y_TEST_LIGHT_ORACLE=1 XT9Y263_PARITY=1 bash scripts/smoke_server.sh
-      - name: Assert exactly identical block and skylight values
-        run: python3 scripts/check_lighting.py baseline-light.log run/xt9y263-smoke.log
+      - name: Compare real Minecraft lighting across isolated worlds
+        run: bash scripts/test_lighting_parity.sh
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: light-parity-logs
           path: |
-            baseline-light.log
+            run/xt9y-light-baseline.log
+            run/xt9y-light-optimized.log
+            run/xt9y263-smoke.log
+          if-no-files-found: ignore
+
+  graphical-client:
+    name: Minecraft 26.3 optimized/baseline software-GL client smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.7.0'
+      - name: Install headless OpenGL software renderer
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y xvfb libgl1-mesa-dri libgl1 mesa-utils libglx-mesa0 mesa-vulkan-drivers vulkan-tools
+      - name: Boot graphical client (software Vulkan may be inconclusive)
+        run: |
+          set +e
+          XT9Y_ALLOW_SOFTWARE_INCONCLUSIVE=1 bash scripts/smoke_client.sh
+          result=$?
+          set -e
+          if [[ "$result" == "77" ]]; then
+            echo "::warning::GPU-less software Vulkan client did not render; real hardware test remains required"
+          else
+            exit "$result"
+          fi
+      - name: Baseline graphical client (software Vulkan may be inconclusive)
+        run: |
+          set +e
+          XT9Y_ALLOW_SOFTWARE_INCONCLUSIVE=1 XT9Y_PERF_BASELINE=1 bash scripts/smoke_client.sh
+          result=$?
+          set -e
+          if [[ "$result" == "77" ]]; then
+            echo "::warning::Baseline client render inconclusive in software Vulkan; hardware validation required"
+          else
+            exit "$result"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: graphical-client-logs
+          path: |
+            run/logs/latest.log
+            run/crash-reports/
+          if-no-files-found: ignore
+
+  benchmark:
+    name: Actual Minecraft server A/B MSPT
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.7.0'
+      - name: Measure and report actual isolated-world server MSPT
+        run: bash scripts/test_tick_benchmark.sh | tee benchmark.md
+      - name: Add benchmark to run summary
+        run: cat benchmark.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: minecraft-real-mspt
+          path: |
+            run/xt9y-mspt-baseline.log
+            run/xt9y-mspt-optimized.log
+            run/xt9y263-smoke.log
+            benchmark.md
+          if-no-files-found: ignore
+
+  engine-parity:
+    name: Source-level worldgen and pathfinding parity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.7.0'
+      - name: Run isolated seeded-world and pathfinding A/B test
+        run: bash scripts/test_engine_parity.sh
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: engine-parity-logs
+          path: |
+            run/xt9y-hotpaths-baseline.log
+            run/xt9y-hotpaths-optimized.log
             run/xt9y263-smoke.log
           if-no-files-found: ignore

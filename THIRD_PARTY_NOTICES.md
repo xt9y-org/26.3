@@ -65,3 +65,54 @@ Only boolean results from vanilla's exact voxel-shape comparison are stored in
 a per-thread, 256-entry bounded cache. No worldgen, lighting or geometry
 approximation is introduced. The C2ME MIT source header and full license are
 included with this mod, and no upstream C2ME JAR is bundled.
+
+## Source-port step 7: immediate text vertex lookup
+
+`dev.xt9y.perf.mixin.rendering.TextGlyphConsumerMixin` adapts the
+`fast_text_lookup` optimization from ImmediatelyFast (copyright
+RK_01/RaphiMC and contributors), LGPL-3.0-or-later:
+https://github.com/RaphiMC/ImmediatelyFast/blob/26.3/common/src/main/java/net/raphimc/immediatelyfast/injection/mixins/fast_text_lookup/MixinTextFeatureRenderer_GlyphRenderer.java
+
+Adjacent glyphs with the **same render-type instance** use the same
+`VertexConsumer` without repeating `getVertexBuilder`. The consumer
+cache belongs to one glyph-renderer instance. No text appearance, glyph
+positions, transparency, or GPU quality setting is modified. A Mixin
+config plugin disables this feature when ImmediatelyFast is separately
+installed or when the user enables the diagnostic baseline.
+
+The full LGPL text and the adapted Java source are packaged within the
+distributed JAR at `META-INF/licenses/LGPL-3.0-ImmediatelyFast.txt`
+and `META-INF/sources/xt9y-rendering/`.
+No ImmediatelyFast binary module is bundled.
+
+## Source-port step 8: Apple GPU full-buffer uploads
+
+`AppleFullBufferUploadMixin` adapts the `fix_slow_buffer_upload_on_apple_gpu`
+code from ImmediatelyFast, RK_01/RaphiMC and contributors (LGPL-3.0-or-later):
+https://github.com/RaphiMC/ImmediatelyFast/blob/26.3/common/src/main/java/net/raphimc/immediatelyfast/injection/mixins/fix_slow_buffer_upload_on_apple_gpu/MixinGlCommandEncoder.java
+
+Only for macOS, only when a GPU buffer is replaced in full and at offset
+zero, invoke `DirectStateAccess.bufferData` rather than
+`bufferSubData`. Other code paths are unchanged. This targets the Apple
+OpenGL upload bottleneck, not Metal. Client correctness and frame-time
+measurements on real Apple hardware remain required.
+Full adapted source is embedded at `META-INF/sources/xt9y-rendering/`.
+
+The LGPL-3.0-or-later ImmediatelyFast-derived sources also include the
+full GNU GPL version 3 companion text required by LGPLv3, distributed in
+`META-INF/licenses/GPL-3.0-Companion.txt`. Both license texts and
+modifiable Java source are retained in the universal Fabric JAR.
+
+## Experimental source ports: chunk-generator settings and AI navigation
+
+`SeaLevelCacheMixin` and `PathNavigationRegionMixin` adapt CaffeineMC Lithium's
+`gen.cached_generator_settings` and `ai.pathing` implementations. Copyright
+CaffeineMC contributors, licensed under LGPL-3.0 (see
+`META-INF/licenses/LGPL-3.0-Lithium.txt` and companion GPLv3 text).
+Source: https://github.com/CaffeineMC/lithium/tree/develop/common/src/main/java/net/caffeinemc/mods/lithium/mixin
+
+Both remain opt-in behind `XT9Y_NATIVE_HOTPATHS=1` until actual 26.3
+client/server compile and gameplay parity pass. They are automatically disabled
+in diagnostic baseline mode or when Lithium is installed. No compiled Lithium
+JAR is embedded. Adapted modifiable source accompanies the Fabric JAR under
+`META-INF/sources/xt9y-engine-hotpaths/`.
