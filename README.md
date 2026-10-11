@@ -60,3 +60,12 @@ property-value storage and is based on FerriteCore's MIT fast-map algorithm.
 Only exact property changes use the shared transition table; no worldgen,
 rendering quality or simulation values are intentionally changed.
 The optimization is automatically skipped if FerriteCore is installed.
+
+### In-house block-state face-array deduplication
+
+Cached face-sturdiness arrays with identical boolean content now share storage,
+avoiding one allocation per block state. The values are unchanged, with no effect
+on collision, occlusion or visuals. This feature runs only when vanilla builds a
+block-state cache; it adds no per-frame or per-tick work. Upstream FerriteCore
+already has an equivalent implementation, so this mixin is automatically skipped
+when FerriteCore is installed.
