@@ -101,6 +101,7 @@ jobs:
           find baseline-world -maxdepth 5 -type f | head -n 120
           echo "Optimized save files:"
           find "$(dirname "$save_file")" -maxdepth 5 -type f | head -n 120
+          python3 scripts/check_world_seed.py 73452981 baseline-world baseline-control "$(dirname "$save_file")"
           python3 scripts/performance_summary.py baseline-smoke.log run/xt9y263-smoke.log control-smoke.log
           python3 scripts/world_semantics.py baseline-world "$(dirname "$save_file")" --control baseline-control
       - uses: actions/upload-artifact@v4
