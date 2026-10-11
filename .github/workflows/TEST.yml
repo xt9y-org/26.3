@@ -169,3 +169,36 @@ jobs:
             run/xt9y263-smoke.log
             benchmark.md
           if-no-files-found: ignore
+
+  engine-parity:
+    name: Source-level worldgen and pathfinding parity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.7.0'
+      - name: Record vanilla hotpath baseline in actual seeded 26.3 world
+        run: |
+          XT9Y_TEST_LEVEL_NAME=xt9y-hotpath-parity-world XT9Y_TEST_WORLDGEN_SNAPSHOT=1 XT9Y_TEST_PATH_ORACLE=1 XT9Y263_PARITY=1 bash scripts/smoke_server.sh
+          cp run/xt9y263-smoke.log baseline-hotpaths.log
+          rm -rf run/xt9y-hotpath-parity-world
+      - name: Record native worldgen and AI path lookup results
+        run: |
+          XT9Y_TEST_LEVEL_NAME=xt9y-hotpath-parity-world XT9Y_TEST_WORLDGEN_SNAPSHOT=1 XT9Y_TEST_PATH_ORACLE=1 XT9Y_NATIVE_HOTPATHS=1 XT9Y263_PARITY=1 bash scripts/smoke_server.sh
+      - name: Assert identical block state fingerprint and path/fluid lookups
+        run: python3 scripts/compare_engine_parity.py baseline-hotpaths.log run/xt9y263-smoke.log
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: engine-parity-logs
+          path: |
+            baseline-hotpaths.log
+            run/xt9y263-smoke.log
+          if-no-files-found: ignore
