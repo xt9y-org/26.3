@@ -48,7 +48,7 @@ public abstract class TextGlyphConsumerMixin {
         }
         if (xt9y$lastRenderType != renderType) {
             xt9y$lastRenderType = renderType;
-            xt9y$lastVertexConsumer = renderer.getVertexBuilder(renderType);
+            xt9y$lastVertexConsumer = ((RenderTypeFeatureRendererAccessor)renderer).xt9y$getVertexBuilder(renderType);
         }
         return xt9y$lastVertexConsumer;
     }
