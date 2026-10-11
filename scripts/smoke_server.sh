@@ -37,7 +37,7 @@ for second in $(seq 1 240); do
       # Spawn chunks alone are not necessarily persisted in 26.3.
       # Force 169 chunks from -6..+6 in both axes, then wait for generation.
       printf 'forceload add -96 -96 96 96\n' >&3
-      sleep 25
+      sleep "${XT9Y_BENCH_SECONDS:-25}"
     fi
     printf 'save-all flush\nstop\n' >&3
     exec 3>&-

@@ -117,3 +117,14 @@ in each of the lit/dark phases. CI launches the same world seed with
 two fields to match exactly. This provides real lighting-correctness coverage
 for future lighting algorithm changes, but is not itself an optimized
 replacement for Minecraft's lighting engine.
+
+## Repeatable in-game TPS/MSPT benchmark
+
+GitHub CI launches the actual Minecraft 26.3 server twice with the same
+seed and 169 forced chunks with 60 seconds of sampling per run: first with `XT9Y_PERF_BASELINE=1`, then with
+the optimizations. An opt-in `XT9Y_TPS_BENCH=1` hook records a bounded
+array of real server tick durations after a 60-tick warmup, reporting
+mean/P95/P99 MSPT and heap use. The hook is entirely absent from normal
+runs. The CI summary includes the measured baseline and optimized values.
+One comparison is not proof of a sustained speedup and does not measure
+GPU rendering/FPS.

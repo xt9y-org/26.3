@@ -89,3 +89,41 @@ jobs:
             baseline-light.log
             run/xt9y263-smoke.log
           if-no-files-found: ignore
+
+  benchmark:
+    name: Actual Minecraft server A/B MSPT
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.7.0'
+      - name: Baseline Minecraft server, seed 73452981
+        run: |
+          XT9Y_TPS_BENCH=1 XT9Y_BENCH_SECONDS=60 XT9Y_PERF_BASELINE=1 XT9Y263_PARITY=1 bash scripts/smoke_server.sh
+          cp run/xt9y263-smoke.log baseline.log
+          rm -rf run/world
+      - name: Optimized Minecraft server, identical forced-chunk workload
+        run: XT9Y_TPS_BENCH=1 XT9Y_BENCH_SECONDS=60 XT9Y263_PARITY=1 bash scripts/smoke_server.sh
+      - name: Report actual tick-time distributions
+        run: |
+          set -euo pipefail
+          grep -q 'XT9Y_TPS_BENCH count=' baseline.log
+          grep -q 'XT9Y_TPS_BENCH count=' run/xt9y263-smoke.log
+          python3 scripts/compare_tick_bench.py baseline.log run/xt9y263-smoke.log | tee benchmark.md
+          cat benchmark.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: minecraft-real-mspt
+          path: |
+            baseline.log
+            run/xt9y263-smoke.log
+            benchmark.md
+          if-no-files-found: ignore
