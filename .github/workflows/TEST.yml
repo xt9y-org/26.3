@@ -40,3 +40,8 @@ jobs:
         run: |
           XT9Y_TEST_BLOCKSTATES=1 bash scripts/smoke_server.sh
           grep -q 'BlockState oracle passed' run/xt9y263-smoke.log
+      - name: Verify identical blockstate semantics with optimization mixins disabled
+        run: |
+          XT9Y_PERF_BASELINE=1 XT9Y_TEST_BLOCKSTATES=1 bash scripts/smoke_server.sh
+          grep -q 'BlockState oracle passed' run/xt9y263-smoke.log
+          grep -q 'baseline: true' run/xt9y263-smoke.log

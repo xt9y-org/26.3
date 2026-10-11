@@ -17,7 +17,7 @@ public final class FaceCacheMixinPlugin implements IMixinConfigPlugin {
     }
 
     @Override public boolean shouldApplyMixin(String target, String mixin) {
-        return !upstreamInstalled;
+        return !upstreamInstalled && !dev.xt9y.perf.engine.PerformanceMode.baseline();
     }
 
     @Override public String getRefMapperConfig() { return null; }

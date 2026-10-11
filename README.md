@@ -69,3 +69,14 @@ on collision, occlusion or visuals. This feature runs only when vanilla builds a
 block-state cache; it adds no per-frame or per-tick work. Upstream FerriteCore
 already has an equivalent implementation, so this mixin is automatically skipped
 when FerriteCore is installed.
+
+## Diagnostic A/B baseline mode
+
+Set `XT9Y_PERF_BASELINE=1` before launching Minecraft to disable **only
+xt9y's optimization mixins** while keeping the normal profiler and mod installed.
+This option is meant for identical-workload benchmarks and CI oracles, not a
+graphics-quality setting. The normal release enables the lossless optimizations.
+
+CI now launches both the optimized and baseline modes and verifies that all
+registered vanilla block-state property transitions remain identical. Note that
+startup/oracle timings alone are not a meaningful FPS or TPS speedup benchmark.
