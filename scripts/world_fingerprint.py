@@ -152,12 +152,23 @@ def read_region(path: Path) -> dict[tuple[int, int], str]:
 
 
 def read_world(world: Path) -> dict[tuple[int, int], str]:
-    result = {}
-    for path in sorted((world / "region").glob("r.*.*.mca")):
-        result.update(read_region(path))
-    if not result:
-        raise ValueError(f"No generated chunk sections found under {world}")
-    return result
+    # Minecraft 26.3 stores even the Overworld in its namespaced dimension
+    # directory; older versions use the root-level region/ directory.
+    candidates = [
+        world / "dimensions" / "minecraft" / "overworld" / "region",
+        world / "region",
+    ]
+    for directory in candidates:
+        if not directory.is_dir():
+            continue
+        result = {}
+        for path in sorted(directory.glob("r.*.*.mca")):
+            result.update(read_region(path))
+        if result:
+            return result
+    raise ValueError(
+        f"No generated Overworld chunk sections in any of {candidates}"
+    )
 
 
 def compare(a: dict, b: dict, minimum: int = 16) -> None:
