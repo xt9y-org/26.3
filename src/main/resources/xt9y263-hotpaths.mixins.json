@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "dev.xt9y.perf.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "dev.xt9y.perf.mixin.hotpath.NativeHotPathPlugin",
+  "mixins": [
+    "worldgen.SeaLevelCacheMixin",
+    "pathing.PathNavigationRegionMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
