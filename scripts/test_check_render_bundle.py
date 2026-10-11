@@ -8,7 +8,7 @@ from check_render_bundle import FILES, verify
 
 
 class RenderBundleTests(unittest.TestCase):
-    def make(self, root: Path, omit: str = "") -> Path:
+    def make(self, root: Path, omit: str = "", unsafe_ai_mixin: bool = False) -> Path:
         path = root / "fabric.jar"
         with ZipFile(path, "w") as jar:
             for filename in FILES:
@@ -20,7 +20,8 @@ class RenderBundleTests(unittest.TestCase):
                     })
                 elif filename == "xt9y263-hotpaths.mixins.json":
                     value = json.dumps({
-                        "mixins": ["worldgen.SeaLevelCacheMixin"],
+                        "mixins": (["worldgen.SeaLevelCacheMixin", "pathing.PathNavigationRegionMixin"]
+                                   if unsafe_ai_mixin else ["worldgen.SeaLevelCacheMixin"]),
                         "plugin": "example.NativeHotPathPlugin",
                     })
                 elif filename == "xt9y263-rendering.mixins.json":
@@ -68,6 +69,20 @@ class RenderBundleTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             path = self.make(Path(tmp), "xt9y263-hotpaths.mixins.json")
             with self.assertRaisesRegex(ValueError, "packaging incomplete"):
+                verify(path)
+
+    def test_path_navigation_override_is_never_registered(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self.make(Path(tmp), unsafe_ai_mixin=True)
+            with self.assertRaisesRegex(ValueError, "Unsafe worldgen/pathing mixin registration"):
+                verify(path)
+
+    def test_compiled_navigation_override_is_forbidden(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self.make(Path(tmp))
+            with ZipFile(path, "a") as jar:
+                jar.writestr("dev/xt9y/perf/mixin/pathing/PathNavigationRegionMixin.class", b"unsafe")
+            with self.assertRaisesRegex(ValueError, "Unsafe aquatic AI pathfinding rewrite"):
                 verify(path)
 
     def test_missing_client_mixin_metadata_is_failure(self):
