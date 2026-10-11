@@ -3,6 +3,13 @@ set -euo pipefail
 
 # Dedicated-server smoke only. This is not yet a performance or parity test.
 mkdir -p run
+# All plain smoke invocations use a fresh private fixture. Never silently
+# open or mutate a player's run/world save.
+xt9y_generated_world=""
+if [[ -z "${XT9Y_TEST_LEVEL_NAME:-}" ]]; then
+  xt9y_generated_world="$(mktemp -d "run/xt9y-smoke-XXXXXXXX")"
+  XT9Y_TEST_LEVEL_NAME="$(basename "$xt9y_generated_world")"
+fi
 printf 'eula=true\n' > run/eula.txt
 cat > run/server.properties <<PROPERTIES
 level-seed=73452981
@@ -27,6 +34,9 @@ cleanup() {
   kill "$launcher" 2>/dev/null || true
   wait "$launcher" 2>/dev/null || true
   rm -f "$fifo"
+  if [[ -n "$xt9y_generated_world" && "${XT9Y_KEEP_SMOKE_WORLDS:-0}" != "1" ]]; then
+    rm -rf -- "$xt9y_generated_world"
+  fi
 }
 trap cleanup EXIT
 
