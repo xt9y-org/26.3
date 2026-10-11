@@ -3,6 +3,7 @@ plugins {
 }
 repositories {
     maven { name = 'CurseMaven'; url = 'https://www.cursemaven.com' }
+    maven { name = 'Modrinth'; url = 'https://api.modrinth.com/maven' }
 }
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -11,6 +12,20 @@ dependencies {
     implementation "curse.maven:fabric-gui-imgui-1423038:8991300"
     include "curse.maven:fabric-gui-imgui-1423038:8991300"
     compileOnly "io.github.spair:imgui-java-binding:1.92.7.1"
+
+    // Lossless engine optimizations. Pin specific 26.3 Fabric releases.
+    // Keep each upstream mod as its own nested JAR with its own metadata,
+    // mixins, license and independent update path; never merge class files.
+    modRuntimeOnly "maven.modrinth:VSNURh3q:cfKRtp0m" // C2ME: chunk generation/scheduling
+    include        "maven.modrinth:VSNURh3q:cfKRtp0m"
+    modRuntimeOnly "maven.modrinth:Ps1zyz6x:g4eqNSKd" // ScalableLux: skylight/blocklight
+    include        "maven.modrinth:Ps1zyz6x:g4eqNSKd"
+    modRuntimeOnly "maven.modrinth:gvQqBUqZ:xS0Q8LSi" // Lithium: entity/game logic
+    include        "maven.modrinth:gvQqBUqZ:xS0Q8LSi"
+    modRuntimeOnly "maven.modrinth:5ZwdcRci:3MP9UR23" // ImmediatelyFast: client rendering
+    include        "maven.modrinth:5ZwdcRci:3MP9UR23"
+    modRuntimeOnly "maven.modrinth:c2DHmFvV:UhO60CKq" // Ferrite: JNI entity/collision hot paths
+    include        "maven.modrinth:c2DHmFvV:UhO60CKq"
 }
 // Compile and embed the native library automatically for the build machine.
 def platformName = System.getProperty('os.name').toLowerCase(Locale.ROOT)
