@@ -27,6 +27,10 @@ def inspect(jar_path: Path) -> set[str]:
         mod = json.loads(root.read("fabric.mod.json"))
         assert mod["id"] == "xt9y263", mod["id"]
         assert "META-INF/THIRD_PARTY_NOTICES.md" in root.namelist(), "Missing credits"
+        for name in ("LGPL-3.0.txt", "MIT-C2ME.txt", "MIT-Ferrite.txt",
+                     "MIT-FerriteCore.txt"):
+            path = f"META-INF/licenses/{name}"
+            assert path in root.namelist(), f"Missing attribution license: {path}"
         declared = [v["file"] for v in mod.get("jars", [])]
         found: set[str] = set()
         for path in declared:
