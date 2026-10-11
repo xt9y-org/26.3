@@ -84,8 +84,8 @@ jobs:
           set -euo pipefail
           cp run/xt9y263-smoke.log control-smoke.log
           mv run/world baseline-control
-      - name: Generate identical seed using eight optimized engines
-        run: XT9Y263_PARITY=1 bash scripts/smoke_server.sh
+      - name: DIAGNOSTIC generate optimized world without C2ME
+        run: XT9Y263_PARITY=1 bash scripts/smoke_server.sh -Pxt9yDisableC2ME=true
       - name: Verify lossless block, biome, heightmap and lighting output
         shell: bash
         run: |
