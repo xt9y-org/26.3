@@ -4,8 +4,7 @@
   "compatibilityLevel": "JAVA_25",
   "plugin": "dev.xt9y.perf.mixin.hotpath.NativeHotPathPlugin",
   "mixins": [
-    "worldgen.SeaLevelCacheMixin",
-    "pathing.PathNavigationRegionMixin"
+    "worldgen.SeaLevelCacheMixin"
   ],
   "injectors": {
     "defaultRequire": 1
