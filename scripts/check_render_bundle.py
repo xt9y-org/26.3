@@ -14,9 +14,11 @@ from zipfile import ZipFile
 FILES = (
     "dev/xt9y/perf/mixin/rendering/TextGlyphConsumerMixin.class",
     "dev/xt9y/perf/mixin/rendering/RenderOptimizationPlugin.class",
+    "dev/xt9y/perf/mixin/rendering/RenderTypeFeatureRendererAccessor.class",
     "dev/xt9y/perf/mixin/rendering/AppleFullBufferUploadMixin.class",
     "META-INF/sources/xt9y-rendering/TextGlyphConsumerMixin.java",
     "META-INF/sources/xt9y-rendering/RenderOptimizationPlugin.java",
+    "META-INF/sources/xt9y-rendering/RenderTypeFeatureRendererAccessor.java",
     "META-INF/sources/xt9y-rendering/AppleFullBufferUploadMixin.java",
     "META-INF/licenses/LGPL-3.0-ImmediatelyFast.txt",
     "META-INF/licenses/GPL-3.0-Companion.txt",
@@ -65,7 +67,8 @@ def verify(jar_path: Path) -> None:
         if render_config.get("mixins", []):
             raise ValueError("Client-only rendering mixin was registered on dedicated server")
         if render_config.get("client") != [
-            "TextGlyphConsumerMixin", "AppleFullBufferUploadMixin"
+            "TextGlyphConsumerMixin", "AppleFullBufferUploadMixin",
+            "RenderTypeFeatureRendererAccessor"
         ]:
             raise ValueError("Client mixin not listed exactly once")
         if not render_config.get("plugin", "").endswith("RenderOptimizationPlugin"):
