@@ -102,3 +102,17 @@ The LGPL-3.0-or-later ImmediatelyFast-derived sources also include the
 full GNU GPL version 3 companion text required by LGPLv3, distributed in
 `META-INF/licenses/GPL-3.0-Companion.txt`. Both license texts and
 modifiable Java source are retained in the universal Fabric JAR.
+
+## Experimental source ports: chunk-generator settings and AI navigation
+
+`SeaLevelCacheMixin` and `PathNavigationRegionMixin` adapt CaffeineMC Lithium's
+`gen.cached_generator_settings` and `ai.pathing` implementations. Copyright
+CaffeineMC contributors, licensed under LGPL-3.0 (see
+`META-INF/licenses/LGPL-3.0-Lithium.txt` and companion GPLv3 text).
+Source: https://github.com/CaffeineMC/lithium/tree/develop/common/src/main/java/net/caffeinemc/mods/lithium/mixin
+
+Both remain opt-in behind `XT9Y_NATIVE_HOTPATHS=1` until actual 26.3
+client/server compile and gameplay parity pass. They are automatically disabled
+in diagnostic baseline mode or when Lithium is installed. No compiled Lithium
+JAR is embedded. Adapted modifiable source accompanies the Fabric JAR under
+`META-INF/sources/xt9y-engine-hotpaths/`.
