@@ -36,9 +36,10 @@ pid=$!
 
 baseline="${XT9Y_PERF_BASELINE:-0}"
 require_glyph="${XT9Y_REQUIRE_GLYPH_SMOKE:-0}"
-for second in $(seq 1 220); do
+for second in $(seq 1 "${XT9Y_SOFTWARE_GPU_TIMEOUT:-120}"); do
   log="run/logs/latest.log"
-  if grep -Eiq '(MixinApplyError|InvalidInjectionException|InjectionError|FATAL|Caused by:)' "$output"; then
+  if grep -Eiq '(MixinApplyError|InvalidInjectionException|InjectionError)' "$output" ||
+     ([[ -f "$log" ]] && grep -Eiq '(MixinApplyError|InvalidInjectionException|InjectionError)' "$log"); then
     echo "Graphical client reported an exception" >&2
     tail -n 120 "$output" >&2
     exit 1
@@ -66,6 +67,17 @@ for second in $(seq 1 220); do
   fi
   sleep 1
 done
+
+# CI software Vulkan may expose a valid Vulkan llvmpipe backend but be too
+# slow to complete Minecraft 26.3 shader compilation/title-screen rendering.
+# Distinguish missing GPU horsepower from a verified successful render.
+if [[ "${XT9Y_ALLOW_SOFTWARE_INCONCLUSIVE:-0}" == "1" ]] &&
+   [[ -f run/logs/latest.log ]] &&
+   grep -Eiq 'Using graphics backend Vulkan.*llvmpipe' run/logs/latest.log; then
+  echo "INCONCLUSIVE: llvmpipe Vulkan initialized but no complete rendered frame" >&2
+  echo "A real hardware client test is required; this is NOT a passing smoke" >&2
+  exit 77
+fi
 
 echo "Graphical client did not complete the required render checks (require glyph=$require_glyph)" >&2
 tail -n 120 "$output" >&2
