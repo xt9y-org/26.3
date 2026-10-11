@@ -39,3 +39,16 @@ thread-safe content-key map and limits itself to boolean[] sharing.
 It does not intern or mutate VoxelShape internals.
 Source: https://github.com/malte0811/FerriteCore/tree/26.1
 MIT license is bundled with this mod.
+
+## Source-port step 5: random chunk tick temporary allocations
+
+Files under `dev.xt9y.perf.engine.randomtick` and
+`dev.xt9y.perf.mixin.randomtick` are adapted from the
+LGPL-3.0-licensed Lithium project by its contributors:
+https://github.com/CaffeineMC/lithium/tree/develop/common/src/main/java/net/caffeinemc/mods/lithium/mixin/alloc/chunk_random
+
+The adapted source files and the unmodified LGPL-3.0 license are distributed
+inside the JAR at `META-INF/sources/xt9y-chunk-random/` and
+`META-INF/licenses/LGPL-3.0-Lithium.txt`, respectively.
+No Lithium JAR is bundled. The source implementation uses the exact same
+int32 random progression and coordinates as Minecraft but avoids allocations.
