@@ -92,3 +92,20 @@ oracle in the actual Minecraft 26.3 server. Adapted under LGPL-3.0 from
 Lithium's 26.3 allocation optimization; full source and license are embedded.
 The mixins are skipped automatically if Lithium is installed separately, and
 `XT9Y_PERF_BASELINE=1` disables the optimization for comparisons.
+
+### Rendering: optional redundant framebuffer unbind elimination
+
+The experimental renderer source optimization skips a redundant
+`glBindFramebuffer(..., 0)` at the end of render passes and restores the
+default framebuffer before presenting a texture or swapping buffers.
+Adapted from ImmediatelyFast's **LGPL-3.0-or-later** implementation for
+Minecraft 26.3, with full corresponding source and license included.
+
+**Disabled by default pending client GPU regression testing.**
+To test it, launch with `XT9Y_RENDER_FBO_OPT=1`. It automatically disables
+itself when external ImmediatelyFast is installed, or
+`XT9Y_PERF_BASELINE=1`. This never reduces rendering resolution/quality
+or intentionally omits graphics; it only skips a redundant GL state call.
+
+This patch does not optimize chunk meshing/terrain batch rendering. It needs
+a graphical client pixel-comparison test before it can be enabled normally.

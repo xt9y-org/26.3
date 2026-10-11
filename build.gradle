@@ -46,6 +46,11 @@ processResources {
         include '*.java'
         into 'META-INF/sources/xt9y-chunk-random'
     }
+    // LGPL source corresponding to the client framebuffer optimization.
+    from('src/main/java/dev/xt9y/perf/mixin/render') {
+        include '*.java'
+        into 'META-INF/sources/xt9y-render-fbo'
+    }
     from(layout.buildDirectory.dir('generated/native'))
     inputs.property 'version', modVersion
     filesMatching('fabric.mod.json') { expand version: modVersion }
