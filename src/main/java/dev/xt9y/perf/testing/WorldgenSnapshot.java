@@ -1,0 +1,43 @@
+package dev.xt9y.perf.testing;
+
+import dev.xt9y.perf.PerfMod;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
+
+/**
+ * Fingerprint seeded, force-loaded terrain without changing world state.
+ * This is a sampled worldgen oracle, not proof that all chunks are equivalent.
+ */
+public final class WorldgenSnapshot {
+    private WorldgenSnapshot() {}
+
+    public static void verify(ServerLevel level) {
+        if (level == null) throw new AssertionError("Missing overworld");
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+            int count = 0;
+            for (int x = -96; x <= 96; x += 8) {
+                for (int z = -96; z <= 96; z += 8) {
+                    for (int y = level.getMinY(); y <= level.getMaxY(); y += 16) {
+                        pos.set(x, y, z);
+                        byte[] state = level.getBlockState(pos).toString()
+                                .getBytes(StandardCharsets.UTF_8);
+                        digest.update((byte)(state.length >>> 8));
+                        digest.update((byte)state.length);
+                        digest.update(state);
+                        count++;
+                    }
+                }
+            }
+            PerfMod.LOGGER.info("XT9Y_WORLDGEN_SNAPSHOT sampled={} sha256={}",
+                    count, HexFormat.of().formatHex(digest.digest()));
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+}
