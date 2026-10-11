@@ -34,5 +34,7 @@ jobs:
         with:
           gradle-version: '9.7.0'
       - run: gradle build --no-daemon
-      - name: Verify five real embedded performance modules
+      - name: Verify six actual bundled performance engines
         run: python3 scripts/check_bundle.py
+      - name: Boot Minecraft server and verify mod compatibility
+        run: bash scripts/smoke_server.sh
