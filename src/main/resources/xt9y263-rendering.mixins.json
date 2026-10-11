@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "dev.xt9y.perf.mixin.rendering",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "dev.xt9y.perf.mixin.rendering.RenderOptimizationPlugin",
+  "client": [
+    "TextGlyphConsumerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

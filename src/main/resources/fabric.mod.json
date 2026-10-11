@@ -22,7 +22,8 @@
     "xt9y263-blockstate.mixins.json",
     "xt9y263-face-cache.mixins.json",
     "xt9y263-chunk-random.mixins.json",
-    "xt9y263-shape-cache.mixins.json"
+    "xt9y263-shape-cache.mixins.json",
+    "xt9y263-rendering.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.19.5",

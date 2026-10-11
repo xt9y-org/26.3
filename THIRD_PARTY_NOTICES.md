@@ -65,3 +65,22 @@ Only boolean results from vanilla's exact voxel-shape comparison are stored in
 a per-thread, 256-entry bounded cache. No worldgen, lighting or geometry
 approximation is introduced. The C2ME MIT source header and full license are
 included with this mod, and no upstream C2ME JAR is bundled.
+
+## Source-port step 7: immediate text vertex lookup
+
+`dev.xt9y.perf.mixin.rendering.TextGlyphConsumerMixin` adapts the
+`fast_text_lookup` optimization from ImmediatelyFast (copyright
+RK_01/RaphiMC and contributors), LGPL-3.0-or-later:
+https://github.com/RaphiMC/ImmediatelyFast/blob/26.3/common/src/main/java/net/raphimc/immediatelyfast/injection/mixins/fast_text_lookup/MixinTextFeatureRenderer_GlyphRenderer.java
+
+Adjacent glyphs with the **same render-type instance** use the same
+`VertexConsumer` without repeating `getVertexBuilder`. The consumer
+cache belongs to one glyph-renderer instance. No text appearance, glyph
+positions, transparency, or GPU quality setting is modified. A Mixin
+config plugin disables this feature when ImmediatelyFast is separately
+installed or when the user enables the diagnostic baseline.
+
+The full LGPL text and the adapted Java source are packaged within the
+distributed JAR at `META-INF/licenses/LGPL-3.0-ImmediatelyFast.txt`
+and `META-INF/sources/xt9y-rendering/`.
+No ImmediatelyFast binary module is bundled.

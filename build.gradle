@@ -46,6 +46,10 @@ processResources {
         include '*.java'
         into 'META-INF/sources/xt9y-chunk-random'
     }
+    from('src/main/java/dev/xt9y/perf/mixin/rendering') {
+        include '*.java'
+        into 'META-INF/sources/xt9y-rendering'
+    }
     from(layout.buildDirectory.dir('generated/native'))
     inputs.property 'version', modVersion
     filesMatching('fabric.mod.json') { expand version: modVersion }

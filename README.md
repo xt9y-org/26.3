@@ -135,3 +135,16 @@ measuring GPU throughput. One session is not statistical proof of a
 performance gain. A GPU graphical client pixel-equivalence test is
 still needed before the experimental framebuffer-binding patch is
 enabled by default.
+
+### In-house text-renderer hot-path optimization
+
+Text glyph rendering uses a per-GlyphRenderer identity cache to avoid
+redundant `getVertexBuilder` calls for adjacent glyphs sharing a render
+type. Ported as editable source from LGPL-3.0-or-later ImmediatelyFast.
+No glyph appearance or quality settings are changed; baseline mode
+(`XT9Y_PERF_BASELINE=1`) disables the redirect. If ImmediatelyFast
+is separately installed its own identical mixin takes precedence.
+
+This targets **text/immediate rendering**, not the entire terrain
+renderer. A dedicated graphical-client smoke and A/B frame-time test
+are still required to claim measured FPS gains.
