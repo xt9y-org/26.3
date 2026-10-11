@@ -12,8 +12,12 @@ import re
 from pathlib import Path
 from zipfile import ZipFile
 
-from assemble_release import PLATFORMS
-from check_render_bundle import verify as verify_mixins
+if __package__:
+    from .assemble_release import PLATFORMS
+    from .check_render_bundle import verify as verify_mixins
+else:
+    from assemble_release import PLATFORMS
+    from check_render_bundle import verify as verify_mixins
 
 SEMVER = re.compile(r"(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)(?:-dev\.[0-9]+)?$")
 NON_PRODUCTION_SUFFIX = re.compile(r"-(?:sources|dev|javadoc|all)\.jar$")
