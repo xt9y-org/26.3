@@ -27,6 +27,14 @@ public final class PerfMod implements ModInitializer {
             dev.xt9y.perf.testing.LightingOracle.register();
         if ("1".equals(System.getenv("XT9Y_TPS_BENCH")))
             dev.xt9y.perf.testing.ServerTickBenchmark.register();
+        if ("1".equals(System.getenv("XT9Y_TEST_WORLDGEN_SNAPSHOT"))) {
+            net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPING
+                    .register(server -> dev.xt9y.perf.testing.WorldgenSnapshot.verify(server.overworld()));
+        }
+        if ("1".equals(System.getenv("XT9Y_TEST_PATH_ORACLE"))) {
+            net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STOPPING
+                    .register(server -> dev.xt9y.perf.testing.PathNavigationOracle.verify(server.overworld()));
+        }
         // No native loading, file IO, or sampling until the debugger is opened.
         final long[] started = {0};
         ServerTickEvents.START_SERVER_TICK.register(server -> {
