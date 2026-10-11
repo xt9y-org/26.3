@@ -35,6 +35,11 @@ for second in $(seq 1 240); do
   if grep -Eq 'Done \([^)]+\)!|Done \(' "$log"; then
     echo "Server startup succeeded after $second seconds."
     if [[ "${XT9Y263_PARITY:-0}" == "1" ]]; then
+      # Prevent random block growth/decay from changing seeded-world
+      # comparison runs solely because their execution times differ.
+      if [[ "${XT9Y_TEST_WORLDGEN_SNAPSHOT:-0}" == "1" ]]; then
+        printf 'gamerule randomTickSpeed 0\n' >&3
+      fi
       # Spawn chunks alone are not necessarily persisted in 26.3.
       # Force 169 chunks from -6..+6 in both axes, then wait for generation.
       if ! printf 'forceload add -96 -96 96 96\n' >&3; then
