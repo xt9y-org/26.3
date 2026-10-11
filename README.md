@@ -173,10 +173,11 @@ and the same 169 forced chunks. The first run uses
 One pair of server runs is **not** evidence of a sustained or statistically
 significant speedup, and says nothing about FPS.
 
-Graphical smoke in CI requires a real client tick, completed rendered frame
-and glyph-buffer optimization invocation. It separately checks baseline
-mode without the glyph mixin. This is a startup/hook correctness check, **not**
-a visual pixel-parity test or real-GPU benchmark.
+Graphical smoke in CI requires a real client tick and completed rendered
+frame, and separately checks baseline mode. The title screen does not
+necessarily invoke world-text glyph rendering; in-world glyph testing requires
+a separate fixture (`XT9Y_REQUIRE_GLYPH_SMOKE=1`). This is a startup/hook
+correctness check, **not** a visual pixel-parity test or real-GPU benchmark.
 
 
 ## Experimental worldgen and pathfinding hot paths
@@ -218,3 +219,11 @@ worldgen structures. The `XT9Y_FPS_BENCH=1` and `XT9Y_TPS_BENCH=1`
 in-game benchmarks remain necessary for performance claims. In-world glyph
 coverage is separately opt-in via `XT9Y_REQUIRE_GLYPH_SMOKE=1`, because a
 fresh graphical client at its title screen never necessarily renders world text.
+
+## Major stable v1.0.0 candidate
+
+For the complete release checklist, actual local test command, exact versioning,
+manual publish workflow and remaining unreplaced engine systems, see
+[`RELEASE_1.0.0.md`](RELEASE_1.0.0.md). The major version is **not**
+published from a PR: it must pass tests, merge into main, then be launched
+manually in GitHub Actions with `version=1.0.0` and `confirm_publish=RELEASE`.
