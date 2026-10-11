@@ -36,6 +36,14 @@ jobs:
       - run: gradle build --no-daemon
       - name: Verify six actual bundled performance engines
         run: python3 scripts/check_bundle.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-stack-binary
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+          if-no-files-found: ignore
       - name: Boot Minecraft server and verify mod compatibility
         run: bash scripts/smoke_server.sh
 
