@@ -12,6 +12,7 @@ upstream distribution, but the performance stack as shipped is tested only as a 
 | Block and sky lighting | ScalableLux 0.3.0-alpha.0.6+26.3 | `Ps1zyz6x:g4eqNSKd` | LGPL-3.0-only | https://github.com/RelativityMC/ScalableLux |
 | Entity ticking, collisions and game logic | Lithium 0.26.2 for 26.3 | `gvQqBUqZ:xS0Q8LSi` | LGPL-3.0-only | https://github.com/CaffeineMC/lithium |
 | Immediate rendering (client only) | ImmediatelyFast 1.17.1+26.3 Fabric | `5ZwdcRci:3MP9UR23` | LGPL-3.0-or-later | https://github.com/RaphiMC/ImmediatelyFast |
+| Block entity rendering (client only) | Optimized Block Entities 1.1.50 (26.3) | `AtOSAunf:nmIzJcIn` | LGPL-3.0-or-later | https://github.com/maDU59/OptimisedBlockEntities |
 | Memory footprint and allocation | FerriteCore 9.0.0 Fabric (26.3-compatible) | `uXXizFIs:d5ddUdiB` | MIT | https://github.com/malte0811/FerriteCore |
 | Rust-assisted entity queries and cramming (experimental upstream release) | Ferrite 0.7.4-alpha+26.3 | `c2DHmFvV:UhO60CKq` | MIT | https://github.com/VoiceLessQ/Ferrite |
 
