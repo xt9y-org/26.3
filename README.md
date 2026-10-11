@@ -148,3 +148,14 @@ is separately installed its own identical mixin takes precedence.
 This targets **text/immediate rendering**, not the entire terrain
 renderer. A dedicated graphical-client smoke and A/B frame-time test
 are still required to claim measured FPS gains.
+
+### Apple GPU upload path
+
+On macOS, a complete GPU-buffer replacement (offset 0, full buffer size)
+uses `bufferData` rather than `bufferSubData`, which can avoid a slow
+Apple OpenGL driver path. Partial uploads and non-Apple platforms retain
+vanilla behavior. Adapted under LGPL from the 26.3 ImmediatelyFast source.
+
+This is a targeted OpenGL optimization, **not** a Metal backend and not a
+complete renderer rewrite. It remains in the development PR pending
+graphical-client startup verification and frame-time measurements.

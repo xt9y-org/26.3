@@ -84,3 +84,16 @@ The full LGPL text and the adapted Java source are packaged within the
 distributed JAR at `META-INF/licenses/LGPL-3.0-ImmediatelyFast.txt`
 and `META-INF/sources/xt9y-rendering/`.
 No ImmediatelyFast binary module is bundled.
+
+## Source-port step 8: Apple GPU full-buffer uploads
+
+`AppleFullBufferUploadMixin` adapts the `fix_slow_buffer_upload_on_apple_gpu`
+code from ImmediatelyFast, RK_01/RaphiMC and contributors (LGPL-3.0-or-later):
+https://github.com/RaphiMC/ImmediatelyFast/blob/26.3/common/src/main/java/net/raphimc/immediatelyfast/injection/mixins/fix_slow_buffer_upload_on_apple_gpu/MixinGlCommandEncoder.java
+
+Only for macOS, only when a GPU buffer is replaced in full and at offset
+zero, invoke `DirectStateAccess.bufferData` rather than
+`bufferSubData`. Other code paths are unchanged. This targets the Apple
+OpenGL upload bottleneck, not Metal. Client correctness and frame-time
+measurements on real Apple hardware remain required.
+Full adapted source is embedded at `META-INF/sources/xt9y-rendering/`.

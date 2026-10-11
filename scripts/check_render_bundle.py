@@ -14,8 +14,10 @@ from zipfile import ZipFile
 FILES = (
     "dev/xt9y/perf/mixin/rendering/TextGlyphConsumerMixin.class",
     "dev/xt9y/perf/mixin/rendering/RenderOptimizationPlugin.class",
+    "dev/xt9y/perf/mixin/rendering/AppleFullBufferUploadMixin.class",
     "META-INF/sources/xt9y-rendering/TextGlyphConsumerMixin.java",
     "META-INF/sources/xt9y-rendering/RenderOptimizationPlugin.java",
+    "META-INF/sources/xt9y-rendering/AppleFullBufferUploadMixin.java",
     "META-INF/licenses/LGPL-3.0-ImmediatelyFast.txt",
     "xt9y263-rendering.mixins.json",
     "fabric.mod.json",
@@ -38,13 +40,15 @@ def verify(jar_path: Path) -> None:
         render_config = json.loads(archive.read("xt9y263-rendering.mixins.json"))
         if render_config.get("mixins", []):
             raise ValueError("Client-only rendering mixin was registered on dedicated server")
-        if render_config.get("client") != ["TextGlyphConsumerMixin"]:
+        if render_config.get("client") != [
+            "TextGlyphConsumerMixin", "AppleFullBufferUploadMixin"
+        ]:
             raise ValueError("Client mixin not listed exactly once")
         if not render_config.get("plugin", "").endswith("RenderOptimizationPlugin"):
             raise ValueError("Conflict/baseline plugin is missing")
 
-        license_text = archive.read(FILES[4]).decode("utf-8")
-        source = archive.read(FILES[2]).decode("utf-8")
+        license_text = archive.read("META-INF/licenses/LGPL-3.0-ImmediatelyFast.txt").decode("utf-8")
+        source = archive.read("META-INF/sources/xt9y-rendering/TextGlyphConsumerMixin.java").decode("utf-8")
         if "GNU LESSER GENERAL PUBLIC LICENSE" not in license_text:
             raise ValueError("LGPL text missing from distributed JAR")
         if "ImmediatelyFast" not in source or "getVertexBuilder" not in source:
