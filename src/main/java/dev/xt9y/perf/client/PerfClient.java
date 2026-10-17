@@ -45,7 +45,7 @@ public final class PerfClient implements ClientModInitializer {
                 boolean alt = InputConstants.isKeyDown(InputConstants.KEY_LALT)
                         || InputConstants.isKeyDown(InputConstants.KEY_RALT);
                 if (command && shift && alt && client.player != null && client.gui.screen() == null) {
-                    client.setScreen(new BlockBrowserScreen());
+                    client.gui.setScreen(new BlockBrowserScreen());
                 } else if (!(command && shift && alt)) {
                     DebugMenu.toggle();
                 }
