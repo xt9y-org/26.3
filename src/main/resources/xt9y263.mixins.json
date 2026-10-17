@@ -6,7 +6,9 @@
     "ComponentMapCompactionMixin"
   ],
   "client": [
-    "GameRendererMixin"
+    "GameRendererMixin",
+    "CheatMouseMixin",
+    "CheatKeyboardMixin"
   ],
   "injectors": {
     "defaultRequire": 1
