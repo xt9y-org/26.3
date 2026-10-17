@@ -29,6 +29,9 @@ public final class PerfClient implements ClientModInitializer {
         final boolean clientSmoke = "1".equals(System.getenv("XT9Y_CLIENT_SMOKE"));
         final boolean[] firstTick = {true};
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (CheatMenu.visible() && (client.player == null || client.gui.screen() != null)) {
+                CheatMenu.close();
+            }
             if (clientSmoke && firstTick[0]) {
                 firstTick[0] = false;
                 dev.xt9y.perf.PerfMod.LOGGER.info("XT9Y_CLIENT_SMOKE: client ticks running");
