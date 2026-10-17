@@ -37,7 +37,19 @@ public final class PerfClient implements ClientModInitializer {
             if (PerformanceState.active() && begin != 0) {
                 NativeBridge.record(2, System.nanoTime() - begin);
             }
-            while (toggle.consumeClick()) DebugMenu.toggle();
+            while (toggle.consumeClick()) {
+                // Minecraft 26.3 uses SDL key constants, not GLFW.
+                boolean command = InputConstants.isKeyDown(InputConstants.KEY_LGUI)
+                        || InputConstants.isKeyDown(InputConstants.KEY_RGUI);
+                boolean shift = InputConstants.isKeyDown(InputConstants.KEY_LSHIFT);
+                boolean alt = InputConstants.isKeyDown(InputConstants.KEY_LALT)
+                        || InputConstants.isKeyDown(InputConstants.KEY_RALT);
+                if (command && shift && alt && client.player != null && client.gui.screen() == null) {
+                    client.setScreen(new BlockBrowserScreen());
+                } else if (!(command && shift && alt)) {
+                    DebugMenu.toggle();
+                }
+            }
         });
     }
 }
