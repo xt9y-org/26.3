@@ -1,6 +1,7 @@
 package dev.xt9y.perf.client;
 
 import dev.xt9y.perf.GrantBlockPayload;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
@@ -142,13 +143,13 @@ public final class BlockBrowserScreen extends Screen {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         int button = event.button();
-        if (inGrid(event.x(), event.y()) && (button == 1 || button == 3)) {
+        if (inGrid(event.x(), event.y()) && (button == InputConstants.MOUSE_BUTTON_LEFT || button == InputConstants.MOUSE_BUTTON_RIGHT)) {
             int col = ((int) event.x() - left) / CELL;
             int row = ((int) event.y() - top) / CELL;
             int index = (scroll + row) * columns + col;
             if (index < matches.size() && ClientPlayNetworking.canSend(GrantBlockPayload.TYPE)) {
                 // The requesting player's identity comes from the connection, not this packet.
-                ClientPlayNetworking.send(new GrantBlockPayload(matches.get(index).id(), button == 1));
+                ClientPlayNetworking.send(new GrantBlockPayload(matches.get(index).id(), button == InputConstants.MOUSE_BUTTON_LEFT));
             }
             return true;
         }
